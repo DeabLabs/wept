@@ -5,15 +5,11 @@ import { prisma } from '@lucia-auth/adapter-prisma';
 import { sveltekit } from 'lucia/middleware';
 import { dev } from '$app/environment';
 import { client } from '$lib/server/prisma';
-import {
-  GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET,
-  DISCORD_CLIENT_ID,
-  DISCORD_CLIENT_SECRET,
-  LOCAL_HOST,
-  VERCEL_URL
-} from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import 'lucia/polyfill/node';
+
+const { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, HOST } =
+  env;
 
 const getCallbackUri = (provider: string) => `/login/${provider}/callback`;
 
@@ -34,9 +30,7 @@ export const githubAuth = github(auth, {
 export const discordAuth = discord(auth, {
   clientId: DISCORD_CLIENT_ID,
   clientSecret: DISCORD_CLIENT_SECRET,
-  redirectUri: dev
-    ? `${LOCAL_HOST}${getCallbackUri('discord')}`
-    : `https://${VERCEL_URL}${getCallbackUri('discord')}`
+  redirectUri: `${HOST}${getCallbackUri('discord')}`
 });
 
 export type Auth = typeof auth;
