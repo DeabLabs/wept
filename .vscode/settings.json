@@ -1,0 +1,8 @@
+{
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": "file:///Users/tony/repos/wept/.github/workflows/deploy.yml"
+  },
+  "svelte.enable-ts-plugin": true,
+  "explorer.compactFolders": true,
+  "workbench.editor.labelFormat": "medium"
+}
