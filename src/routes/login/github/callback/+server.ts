@@ -1,4 +1,4 @@
-import { auth, githubAuth } from '$lib/server/lucia.js';
+import { auth, githubAuth, upgradeUser } from '$lib/server/lucia.js';
 import { OAuthRequestError } from '@lucia-auth/oauth';
 
 export const GET = async ({ url, cookies, locals }) => {
@@ -16,7 +16,14 @@ export const GET = async ({ url, cookies, locals }) => {
 
     const getUser = async () => {
       const existingUser = await getExistingUser();
-      if (existingUser) return existingUser;
+      if (existingUser) {
+        if (!existingUser.avatar) {
+          await upgradeUser(existingUser.id, {
+            avatar: githubUser.avatar_url
+          });
+        }
+        return existingUser;
+      }
       const user = await createUser({
         attributes: {
           username: githubUser.login,

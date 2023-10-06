@@ -1,5 +1,8 @@
-import { auth, discordAuth } from '$lib/server/lucia.js';
+import { auth, discordAuth, upgradeUser } from '$lib/server/lucia.js';
 import { OAuthRequestError } from '@lucia-auth/oauth';
+
+const makeDiscordAvatarUrl = (id: string, avatarId: string) =>
+  `https://cdn.discordapp.com/avatars/${id}/${avatarId}.png`;
 
 export const GET = async ({ url, cookies, locals }) => {
   const storedState = cookies.get('discord_oauth_state');
@@ -16,11 +19,21 @@ export const GET = async ({ url, cookies, locals }) => {
 
     const getUser = async () => {
       const existingUser = await getExistingUser();
-      if (existingUser) return existingUser;
+
+      if (existingUser) {
+        if (!existingUser.avatar) {
+          await upgradeUser(existingUser.id, {
+            avatar: makeDiscordAvatarUrl(discordUser.id, discordUser.avatar)
+          });
+        }
+
+        return existingUser;
+      }
       const user = await createUser({
         attributes: {
           username: discordUser.username,
-          email: discordUser.email
+          email: discordUser.email,
+          avatar: makeDiscordAvatarUrl(discordUser.id, discordUser.avatar)
         }
       });
       return user;

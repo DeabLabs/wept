@@ -33,4 +33,17 @@ export const discordAuth = discord(auth, {
   redirectUri: `${HOST}${getCallbackUri('discord')}`
 });
 
+export const upgradeUser = async (
+  userId: string,
+  attributes: Partial<Lucia.DatabaseUserAttributes>
+) => {
+  const user = await client.user.update({
+    where: {
+      id: userId
+    },
+    data: attributes
+  });
+  return user;
+};
+
 export type Auth = typeof auth;

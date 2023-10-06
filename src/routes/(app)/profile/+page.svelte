@@ -26,7 +26,4 @@
       </tbody>
     </table>
   </div>
-  <form method="post" action="?/logout" use:enhance>
-    <button class="btn" type="submit">Sign out</button>
-  </form>
 </section>

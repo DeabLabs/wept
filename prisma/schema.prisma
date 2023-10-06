@@ -15,6 +15,7 @@ model User {
   id       String  @id @unique
   username String
   email    String?
+  avatar   String?
 
   auth_session Session[]
   key          Key[]
