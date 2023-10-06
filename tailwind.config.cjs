@@ -1,3 +1,6 @@
+import d from 'daisyui';
+import t from '@tailwindcss/typography';
+
 /** @type {import('tailwindcss').Config}*/
 const config = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
@@ -6,7 +9,7 @@ const config = {
     extend: {}
   },
 
-  plugins: []
+  plugins: [t, d]
 };
 
 module.exports = config;

@@ -4,5 +4,6 @@
   },
   "svelte.enable-ts-plugin": true,
   "explorer.compactFolders": true,
-  "workbench.editor.labelFormat": "medium"
+  "workbench.editor.labelFormat": "medium",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

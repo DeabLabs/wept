@@ -4,14 +4,16 @@
   const availableAuth = data.availableAuthProviders;
 </script>
 
-<h1>Sign in</h1>
-
-<div>
-  <ul class="flex flex-col gap-4 my-8">
+<section
+  class="prose max-w-full h-screen w-screen absolute top-0 left-0 flex flex-col gap-4 justify-center items-center"
+>
+  <h1>wept</h1>
+  <ul class="not-prose menu rounded-box bg-base-200 w-56">
+    <li class="menu-title">Sign In</li>
     {#each Object.keys(availableAuth) as auth}
-      <li>
-        <a href={`/login/${auth}`} class="rounded p-2 bg-slate-500">Sign in with {auth}</a>
+      <li class="">
+        <a href={`/login/${auth}`}>Sign in with {auth}</a>
       </li>
     {/each}
   </ul>
-</div>
+</section>

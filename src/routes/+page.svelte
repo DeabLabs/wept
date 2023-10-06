@@ -6,9 +6,27 @@
   export let data: PageData;
 </script>
 
-<h1>Profile</h1>
-<p>User id: {data.userId}</p>
-<p>Username: {data.username}</p>
-<form method="post" action="?/logout" use:enhance>
-  <input type="submit" value="Sign out" />
-</form>
+<section class="p-20 flex flex-col gap-8">
+  <h1 class="text-xl">Profile</h1>
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>id</th>
+          <th>username</th>
+          <th>email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{data.userId}</td>
+          <td>{data.username}</td>
+          <td>{data.email}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <form method="post" action="?/logout" use:enhance>
+    <button class="btn" type="submit">Sign out</button>
+  </form>
+</section>
