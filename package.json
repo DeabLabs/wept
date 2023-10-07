@@ -25,6 +25,7 @@
     "clsx": "^2.0.0",
     "daisyui": "^3.9.2",
     "lucia": "^2.7.1",
+    "lucide-svelte": "^0.284.0",
     "prisma": "^5.4.1",
     "svelte": "^4.0.5"
   },
