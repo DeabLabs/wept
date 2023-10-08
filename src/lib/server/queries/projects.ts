@@ -94,7 +94,7 @@ export const deleteProject = async (projectId: string, userId: string) => {
 export const updateProject = async (
   projectId: string,
   userId: string,
-  args: Pick<Prisma.ProjectUpdateInput, 'name' | 'context'>
+  args: Pick<Prisma.ProjectUpdateInput, 'name' | 'context' | 'description'>
 ) => {
   // only admin of project can update project
   const project = await client.project.findFirst({

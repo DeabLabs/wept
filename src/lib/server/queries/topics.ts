@@ -41,7 +41,7 @@ export const createTopic = async (projectId: string, userId: string, name: strin
 export const updateTopic = async (
   topicId: string,
   userId: string,
-  args: Pick<Prisma.TopicUpdateInput, 'name' | 'context'>
+  args: Pick<Prisma.TopicUpdateInput, 'name' | 'context' | 'description'>
 ) => {
   // only admin of topic can update topic
   const topic = await client.topic.findFirst({

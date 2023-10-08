@@ -27,6 +27,7 @@ export const actions = {
     const form = await request.formData();
     const name = form.get('name')?.toString();
     const context = form.get('context')?.toString();
+    const description = form.get('description')?.toString();
 
     if (!name) {
       throw fail(400, {
@@ -39,7 +40,7 @@ export const actions = {
       });
     }
 
-    await updateProject(projectId, userId, { name, context });
+    await updateProject(projectId, userId, { name, context, description });
 
     return { updateProject: { success: true } };
   }

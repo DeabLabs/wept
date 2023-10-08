@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import Avatar from '$lib/components/avatar.svelte';
   import DrawerToggle from '$lib/components/drawerToggle.svelte';
-  import PlaceholderUser from '$lib/components/icons/placeholderUser.svelte';
   import type { User } from 'lucia';
   import { Menu } from 'lucide-svelte';
 
@@ -18,13 +18,7 @@
   <div class="flex-none gap-2">
     <div class="dropdown dropdown-end">
       <button tabindex="0" class="btn btn-ghost btn-circle avatar">
-        <div class="w-10 rounded-full">
-          {#if user.avatar}
-            <img src={user.avatar} alt="your profile" />
-          {:else}
-            <PlaceholderUser className="h-10 w-10" />
-          {/if}
-        </div>
+        <Avatar avatar={user.avatar} />
       </button>
       <ul class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-200 rounded-box w-52">
         <li class="menu-title">Hey, {user.username}</li>

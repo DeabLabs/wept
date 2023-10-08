@@ -2,9 +2,9 @@
   export let drawerId: string;
 </script>
 
-<div class="drawer lg:drawer-open">
+<div class="drawer lg:drawer-open w-screen absolute">
   <input id={drawerId} type="checkbox" class="drawer-toggle" />
-  <div class="drawer-content flex flex-col">
+  <div class="drawer-content flex flex-col w-full">
     <slot name="content" />
   </div>
   <div class="drawer-side">

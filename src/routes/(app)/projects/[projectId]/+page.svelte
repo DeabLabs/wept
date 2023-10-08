@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { applyAction, enhance } from '$app/forms';
+  import { enhance } from '$app/forms';
   import Container from '$lib/components/container.svelte';
-  import { Cross, Trash, X } from 'lucide-svelte';
+  import { Trash, X } from 'lucide-svelte';
 
   export let data;
   export let form;
@@ -14,7 +14,7 @@
       ><Trash /></button
     >
   </h1>
-  <h2>{data.project.name}</h2>
+  <h2 class="text-info">{data.project.name}</h2>
 
   <form
     method="post"
@@ -37,6 +37,22 @@
           class="input input-bordered w-full max-w-xs"
           value={data.project.name}
         />
+      </div>
+      <div class="form-control">
+        <label class="label" for="description">
+          <span class="label-text">Description</span>
+        </label>
+        <textarea
+          name="description"
+          class="textarea textarea-bordered h-24"
+          placeholder="This project is about..."
+          value={data.project.description}
+        />
+        <label class="label" for="description">
+          <span class="label-text"
+            >Describe this project for yourself, and others, to keep on track.</span
+          >
+        </label>
       </div>
       <div class="form-control">
         <label class="label" for="context">
@@ -69,7 +85,7 @@
           on:click={() => {
             form = null;
           }}
-          class="absolute top-2 right-2 btn btn-circle btn-xs btn-primary"
+          class="absolute top-2 right-2 btn btn-circle btn-xs btn-neutral"
         >
           <X size={16} />
         </button>
@@ -81,7 +97,7 @@
           on:click={() => {
             form = null;
           }}
-          class="absolute top-2 right-2 btn btn-circle btn-xs btn-primary"
+          class="absolute top-2 right-2 btn btn-circle btn-xs btn-neutral"
         >
           <X size={16} />
         </button>

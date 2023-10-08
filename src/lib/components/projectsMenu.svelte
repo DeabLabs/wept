@@ -16,7 +16,7 @@
         {#each project.topics as topic}
           <li>
             <a
-              href={`/projects/${project.id}/topics/${topic.id}`}
+              href={`/projects/${project.id}/topics/${topic.id}/chat`}
               on:click={(e) => e.stopPropagation()}>{topic.name}</a
             >
           </li>
