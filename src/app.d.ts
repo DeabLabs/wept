@@ -10,6 +10,13 @@ declare global {
     // interface Platform {}
   }
 
+  declare namespace svelteHTML {
+    interface HTMLAttributes<T> {
+      'on:app:click_outside'?: CompositionEventHandler<T>;
+      'on:app:escape'?: CompositionEventHandler<T>;
+    }
+  }
+
   namespace Lucia {
     type Auth = import('$lib/server/lucia').Auth;
     type DatabaseUserAttributes = {

@@ -1,6 +1,8 @@
 <script>
   import Drawer from '$lib/components/drawer.svelte';
+  import NavLinks from '$lib/components/navLinks.svelte';
   import Navbar from '$lib/components/navbar.svelte';
+  import ProjectsMenu from '$lib/components/projectsMenu.svelte';
 
   export let data;
 
@@ -13,12 +15,8 @@
     <slot />
   </svelte:fragment>
   <svelte:fragment slot="sidebar">
-    <li>
-      <a href="/dashboard">Dashboard</a>
-    </li>
-    <li>
-      <a href="/profile">Profile</a>
-    </li>
-    <li />
+    <NavLinks />
+    <div class="divider" />
+    <ProjectsMenu projects={data.projects} />
   </svelte:fragment>
 </Drawer>
