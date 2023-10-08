@@ -1,11 +1,12 @@
 <script lang="ts">
+  import Container from '$lib/components/container.svelte';
   import type { PageData } from './$types';
 
   export let data: PageData;
 </script>
 
-<section class="p-20 flex flex-col gap-8">
-  <h1 class="text-xl">Profile</h1>
+<Container className="flex flex-col gap-8">
+  <h1>Profile</h1>
   <div class="overflow-x-auto">
     <table class="table">
       <thead>
@@ -24,4 +25,4 @@
       </tbody>
     </table>
   </div>
-</section>
+</Container>

@@ -1,3 +1,7 @@
-<div class="p-20">
-  <h1 class="text-xl">Dashboard</h1>
-</div>
+<script lang="ts">
+  import Container from '$lib/components/container.svelte';
+</script>
+
+<Container>
+  <h1>Dashboard</h1>
+</Container>

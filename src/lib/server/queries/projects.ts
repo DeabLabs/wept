@@ -1,6 +1,23 @@
 import { client } from '$lib/server/prisma';
 import type { Prisma } from '@prisma/client';
 
+export const getAuthorizedProject = async (projectId: string, userId: string) => {
+  // user must be an admin of the project to get the authorized project
+  const project = await client.project.findFirst({
+    where: {
+      id: projectId,
+      users: {
+        some: {
+          user_id: userId,
+          admin: true
+        }
+      }
+    }
+  });
+
+  return project;
+};
+
 export const getAuthorizedProjectsWithTopics = async (userId: string) => {
   const projects = await client.project.findMany({
     where: {
@@ -24,6 +41,9 @@ export const getAuthorizedProjectsWithTopics = async (userId: string) => {
           name: true
         }
       }
+    },
+    orderBy: {
+      createdAt: 'desc'
     }
   });
   return projects;
