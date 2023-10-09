@@ -25,8 +25,8 @@
       return async ({ result, update }) => {
         await update();
         await applyAction(result);
-        close();
         loading = false;
+        close();
       };
     }}
     use:clickOutside
