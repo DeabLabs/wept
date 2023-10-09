@@ -40,7 +40,7 @@ export const actions = {
     const userId = session.user.userId;
     const form = await request.formData();
     const name = form.get('name')?.toString();
-    const projectId = form.get('projectId')?.toString();
+    const projectId = Number(form.get('projectId')?.toString());
 
     if (!name) {
       throw fail(400, {
@@ -53,7 +53,7 @@ export const actions = {
       });
     }
 
-    if (!projectId) {
+    if (!projectId || isNaN(projectId)) {
       throw fail(400, {
         createTopic: {
           success: false,

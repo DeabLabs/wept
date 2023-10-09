@@ -1,144 +1,157 @@
-import { client } from '$lib/server/prisma';
-import type { Prisma } from '@prisma/client';
+import { db } from '$lib/server/drizzle';
+import { and, eq, sql } from 'drizzle-orm';
+import { message, topic, usersInProjects, usersInTopics } from '../../../../drizzle/schema';
 
-export const getTopic = async (topicId: string, userId: string) => {
-  const topic = await client.topic.findFirst({
-    where: {
-      id: topicId,
-      users: {
-        some: {
-          user_id: userId
-        }
-      }
-    },
-    include: {
-      messages: true
-    }
-  });
+type Topic = typeof topic.$inferSelect;
 
-  if (!topic) {
-    return topic;
+export const getTopic = async (topicId: number, userId: string) => {
+  // get a topic if the user is a member of the topic
+  const result = await db
+    .select()
+    .from(usersInTopics)
+    .innerJoin(topic, eq(usersInTopics.topicId, topic.id))
+    .where(and(eq(usersInTopics.userId, userId), eq(usersInTopics.topicId, topicId)))
+    .limit(1);
+
+  if (!result.length) {
+    return null;
   }
 
-  const userCount = await client.usersInTopics.count({
-    where: {
-      topic_id: topicId
-    }
-  });
+  const userCount = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(usersInTopics)
+    .where(eq(usersInTopics.topicId, topicId));
 
-  return { ...topic, userCount };
+  if (!userCount.length) {
+    return null;
+  }
+
+  return { ...result[0].Topic, userCount: Number(userCount[0].count) };
 };
 
-export const createTopic = async (projectId: string, userId: string, name: string) => {
-  const topic = await client.topic.create({
-    data: {
-      name,
-      project: {
-        connect: {
-          id: projectId
-        }
-      },
-      users: {
-        create: {
-          user_id: userId,
-          admin: true
-        }
-      }
+export const createTopic = async (projectId: number, userId: string, name: string) => {
+  // a user can create a topic within a project, only if they are an admin of the project
+  const result = await db
+    .select()
+    .from(usersInProjects)
+    .where(
+      and(
+        eq(usersInProjects.projectId, projectId),
+        eq(usersInProjects.userId, userId),
+        eq(usersInProjects.admin, true)
+      )
+    )
+    .limit(1);
+
+  if (!result.length) {
+    return null;
+  }
+
+  return db.transaction(async (tx) => {
+    const newTopic = await tx
+      .insert(topic)
+      .values({
+        name,
+        projectId,
+        updatedAt: new Date().toISOString()
+      })
+      .returning();
+
+    if (!newTopic.length) {
+      tx.rollback();
+      return null;
     }
+
+    await tx.insert(usersInTopics).values({
+      userId,
+      topicId: newTopic[0].id,
+      admin: true,
+      updatedAt: new Date().toISOString()
+    });
+
+    return newTopic[0];
   });
-  return topic;
 };
 
 export const updateTopic = async (
-  topicId: string,
+  topicId: number,
   userId: string,
-  args: Pick<Prisma.TopicUpdateInput, 'name' | 'context' | 'description'>
+  args: Pick<Partial<Topic>, 'name' | 'context' | 'description'>
 ) => {
   // only admin of topic can update topic
-  const topic = await client.topic.findFirst({
-    where: {
-      id: topicId,
-      users: {
-        some: {
-          user_id: userId,
-          admin: true
-        }
-      }
-    }
-  });
+  const isAdmin = await db
+    .select()
+    .from(usersInTopics)
+    .where(and(eq(usersInTopics.topicId, topicId), eq(usersInTopics.userId, userId)));
 
-  if (!topic) {
+  if (!isAdmin.length || !isAdmin[0].admin) {
     return null;
   }
 
-  const updatedTopic = await client.topic.update({
-    where: {
-      id: topicId
-    },
-    data: args
-  });
+  const result = await db
+    .update(topic)
+    .set(args)
+    .where(and(eq(topic.id, topicId)))
+    .returning();
 
-  return updatedTopic;
+  if (!result.length) {
+    return null;
+  }
+
+  return result[0];
 };
 
-export const deleteTopic = async (topicId: string, userId: string) => {
+export const deleteTopic = async (topicId: number, userId: string) => {
   // user must be an admin to delete a topic
-  const topic = await client.topic.findFirst({
-    where: {
-      id: topicId,
-      users: {
-        some: {
-          user_id: userId,
-          admin: true
-        }
-      }
-    }
-  });
+  // when a topic is deleted, it should cascade and delete all messages and usersInTopics
 
-  if (!topic) {
+  const isAdmin = await db
+    .select({ admin: usersInTopics.admin })
+    .from(usersInTopics)
+    .where(
+      and(
+        eq(usersInTopics.topicId, topicId),
+        eq(usersInTopics.userId, userId),
+        eq(usersInTopics.admin, true)
+      )
+    );
+
+  if (!isAdmin.length || !isAdmin[0].admin) {
     return null;
   }
 
-  const deletedTopic = await client.topic.delete({
-    where: {
-      id: topicId
-    }
-  });
-
-  return deletedTopic;
+  return await db
+    .delete(topic)
+    .where(and(eq(topic.id, topicId)))
+    .returning();
 };
 
-export const addMessageToTopic = async (topicId: string, userId: string, message: string) => {
-  const topic = await client.topic.findFirst({
-    where: {
-      id: topicId,
-      users: {
-        some: {
-          user_id: userId
-        }
-      }
-    }
-  });
+export const addMessageToTopic = async (topicId: number, userId: string, content: string) => {
+  // a user can add a message to a topic if they are a member of the topic
 
-  if (!topic) {
+  const result = await db
+    .select()
+    .from(usersInTopics)
+    .where(and(eq(usersInTopics.topicId, topicId), eq(usersInTopics.userId, userId)))
+    .limit(1);
+
+  if (!result.length) {
     return null;
   }
 
-  const createdMessage = await client.message.create({
-    data: {
-      content: message,
-      topic: {
-        connect: {
-          id: topicId
-        }
-      },
-      author: {
-        connect: {
-          id: userId
-        }
-      }
-    }
-  });
+  const newMessage = await db
+    .insert(message)
+    .values({
+      topicId,
+      authorId: userId,
+      content,
+      updatedAt: new Date().toISOString()
+    })
+    .returning();
 
-  return createdMessage;
+  if (!newMessage.length) {
+    return null;
+  }
+
+  return newMessage[0];
 };

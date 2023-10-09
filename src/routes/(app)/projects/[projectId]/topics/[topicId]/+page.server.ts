@@ -5,7 +5,7 @@ export const load = async ({ locals, params }) => {
   const session = await locals.auth.validate();
   if (!session) throw redirect(302, '/login');
 
-  const topicId = params.topicId;
+  const topicId = Number(params.topicId);
   const topic = await getTopic(topicId, session.user.userId);
 
   if (!topic) {
@@ -24,7 +24,7 @@ export const actions = {
     if (!session) throw redirect(302, '/login');
 
     const userId = session.user.userId;
-    const topicId = params.topicId;
+    const topicId = Number(params.topicId);
 
     await deleteTopic(topicId, userId);
 
@@ -35,7 +35,7 @@ export const actions = {
     if (!session) throw redirect(302, '/login');
 
     const userId = session.user.userId;
-    const topicId = params.topicId;
+    const topicId = Number(params.topicId);
     const form = await request.formData();
     const name = form.get('name')?.toString();
     const description = form.get('description')?.toString();
