@@ -10,8 +10,14 @@
 <Container>
   <h1 class="flex justify-between">
     <span>Project Settings</span>
-    <button class="btn btn-square hover:btn-error focus-visible:btn-error transition-colors"
-      ><Trash /></button
+    <button
+      class="btn btn-square hover:btn-error focus-visible:btn-error transition-colors"
+      on:click={() => {
+        const modal = document.getElementById('delete-modal');
+        if (modal instanceof HTMLDialogElement) {
+          modal.showModal();
+        }
+      }}><Trash /></button
     >
   </h1>
   <h2 class="text-info">{data.project.name}</h2>
@@ -75,6 +81,22 @@
     </fieldset>
   </form>
 </Container>
+
+<dialog id="delete-modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Are you sure you want to delete this project?</h3>
+    <p class="py-4">
+      This will delete the project, and all topics inside of it, for all users.<br />
+      <b class="font-extrabold">This action cannot be reversed.</b>
+    </p>
+    <form method="post" action="?/delete" use:enhance class="flex justify-end">
+      <button class="btn btn-error">delete</button>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>cancel</button>
+  </form>
+</dialog>
 
 <!-- @TODO refactor this into component -->
 {#if form}

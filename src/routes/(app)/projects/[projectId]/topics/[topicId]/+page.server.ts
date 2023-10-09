@@ -1,4 +1,4 @@
-import { getTopic, updateTopic } from '$lib/server/queries/topics.js';
+import { deleteTopic, getTopic, updateTopic } from '$lib/server/queries/topics.js';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const load = async ({ locals, params }) => {
@@ -19,6 +19,17 @@ export const load = async ({ locals, params }) => {
 };
 
 export const actions = {
+  delete: async ({ locals, params }) => {
+    const session = await locals.auth.validate();
+    if (!session) throw redirect(302, '/login');
+
+    const userId = session.user.userId;
+    const topicId = params.topicId;
+
+    await deleteTopic(topicId, userId);
+
+    throw redirect(302, `/dashboard`);
+  },
   update: async ({ locals, request, params }) => {
     const session = await locals.auth.validate();
     if (!session) throw redirect(302, '/login');

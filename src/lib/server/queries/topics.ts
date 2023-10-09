@@ -16,6 +16,10 @@ export const getTopic = async (topicId: string, userId: string) => {
     }
   });
 
+  if (!topic) {
+    return topic;
+  }
+
   const userCount = await client.usersInTopics.count({
     where: {
       topic_id: topicId

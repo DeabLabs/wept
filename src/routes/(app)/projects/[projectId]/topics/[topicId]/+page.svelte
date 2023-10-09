@@ -10,7 +10,14 @@
 <Container>
   <h1 class="flex justify-between">
     <span>Topic Settings</span>
-    <button class="btn btn-square hover:btn-error focus-visible:btn-error transition-colors"
+    <button
+      on:click={() => {
+        const modal = document.getElementById('delete-modal');
+        if (modal instanceof HTMLDialogElement) {
+          modal.showModal();
+        }
+      }}
+      class="btn btn-square hover:btn-error focus-visible:btn-error transition-colors"
       ><Trash /></button
     >
   </h1>
@@ -79,10 +86,26 @@
   </form>
 </Container>
 
+<dialog id="delete-modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Are you sure you want to delete this topic?</h3>
+    <p class="py-4">
+      This will delete the topic for all users. <br />
+      <b class="font-extrabold">This action cannot be reversed.</b>
+    </p>
+    <form method="post" action="?/delete" use:enhance class="flex justify-end">
+      <button class="btn btn-error">delete</button>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>cancel</button>
+  </form>
+</dialog>
+
 <!-- @TODO refactor this into component -->
 {#if form}
   <div class="toast toast-end">
-    {#if form.updateTopic.success}
+    {#if form?.updateTopic?.success}
       <div class="alert alert-success">
         <button
           on:click={() => {
@@ -94,7 +117,7 @@
         </button>
         <span>"{data.topic.name}" updated successfully.</span>
       </div>
-    {:else if !form.updateTopic.success}
+    {:else if form?.updateTopic?.success === false}
       <div class="alert alert-error">
         <button
           on:click={() => {

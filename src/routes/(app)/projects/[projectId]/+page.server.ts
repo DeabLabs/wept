@@ -1,4 +1,8 @@
-import { getAuthorizedProject, updateProject } from '$lib/server/queries/projects.js';
+import {
+  deleteProject,
+  getAuthorizedProject,
+  updateProject
+} from '$lib/server/queries/projects.js';
 import { fail, redirect } from '@sveltejs/kit';
 
 export const load = async ({ locals, params }) => {
@@ -43,5 +47,16 @@ export const actions = {
     await updateProject(projectId, userId, { name, context, description });
 
     return { updateProject: { success: true } };
+  },
+  delete: async ({ locals, params }) => {
+    const session = await locals.auth.validate();
+    if (!session) throw redirect(302, '/login');
+
+    const userId = session.user.userId;
+    const projectId = params.projectId;
+
+    await deleteProject(projectId, userId);
+
+    throw redirect(302, `/dashboard`);
   }
 };
