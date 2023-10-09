@@ -78,7 +78,7 @@
           >
         </label>
       </div>
-      <div class="flex justify-between mt-24">
+      <div class="flex justify-between mb-4 sm:mb-0 sm:mt-24">
         <a href={data.chatUrl} class="btn btn-neutral">Return to Chat</a>
         <button class="btn btn-primary">Save</button>
       </div>

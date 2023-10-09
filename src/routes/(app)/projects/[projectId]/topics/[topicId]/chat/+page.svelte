@@ -12,7 +12,9 @@
 <Container
   className="not-prose flex flex-col justify-center items-center sm:ml-0 max-w-full w-full"
 >
-  <ul class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl">
+  <ul
+    class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl w-full sm:w-auto"
+  >
     <li>
       <button
         on:click={() => {
@@ -23,12 +25,12 @@
         }}><Info /><span class="text-lg font-bold text-info">{data.topic.name}</span></button
       >
     </li>
-    <li>
+    <li class="hidden sm:flex">
       <span>
         <AvatarGroup partialUsers={testUsers} />
       </span>
     </li>
-    <li><a href={data.settingsLink}><Settings /></a></li>
+    <li class="hidden sm:flex"><a href={data.settingsLink}><Settings /></a></li>
   </ul>
 </Container>
 
@@ -39,6 +41,14 @@
         >{data.topic.userCount} {memberCountLabel}</span
       >
     </h3>
+    <ul class="sm:hidden flex gap-2 w-full justify-between items-center mt-1">
+      <li>
+        <span>
+          <AvatarGroup partialUsers={testUsers} />
+        </span>
+      </li>
+      <li><a href={data.settingsLink}><Settings /></a></li>
+    </ul>
     <p class="py-4">
       {#if data.topic.description}
         {data.topic.description}

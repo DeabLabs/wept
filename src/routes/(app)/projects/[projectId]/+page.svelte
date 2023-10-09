@@ -77,7 +77,7 @@
           >
         </label>
       </div>
-      <button class="btn btn-primary mt-24 flex self-end">Save</button>
+      <button class="btn btn-primary mb-4 sm:mb-0 sm:mt-24 flex self-end">Save</button>
     </fieldset>
   </form>
 </Container>
