@@ -7,7 +7,7 @@
   const remainingUserCount = partialUsers.length - firstThreeUsers.length;
 </script>
 
-<div class="avatar-group -space-x-6 hover:-space-x-0 transition-all">
+<div class="avatar-group -space-x-6 hover:-space-x-2 transition-all">
   {#each firstThreeUsers as user}
     <Avatar avatar={user.avatar} />
   {/each}
