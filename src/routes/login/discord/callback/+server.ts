@@ -32,7 +32,7 @@ export const GET = async ({ url, cookies, locals }) => {
       const user = await createUser({
         attributes: {
           username: discordUser.username,
-          email: discordUser.email,
+          email: discordUser.email ?? null,
           avatar: makeDiscordAvatarUrl(discordUser.id, discordUser.avatar)
         }
       });
@@ -58,6 +58,9 @@ export const GET = async ({ url, cookies, locals }) => {
         status: 400
       });
     }
+
+    console.error(e);
+
     return new Response(null, {
       status: 500
     });

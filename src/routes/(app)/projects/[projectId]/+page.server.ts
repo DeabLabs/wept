@@ -9,7 +9,7 @@ export const load = async ({ locals, params }) => {
   const session = await locals.auth.validate();
   if (!session) throw redirect(302, '/login');
 
-  const projectId = params.projectId;
+  const projectId = Number(params.projectId);
   const project = await getAuthorizedProject(projectId, session.user.userId);
 
   if (!project) {
@@ -27,7 +27,7 @@ export const actions = {
     if (!session) throw redirect(302, '/login');
 
     const userId = session.user.userId;
-    const projectId = params.projectId;
+    const projectId = Number(params.projectId);
     const form = await request.formData();
     const name = form.get('name')?.toString();
     const context = form.get('context')?.toString();
@@ -53,7 +53,7 @@ export const actions = {
     if (!session) throw redirect(302, '/login');
 
     const userId = session.user.userId;
-    const projectId = params.projectId;
+    const projectId = Number(params.projectId);
 
     await deleteProject(projectId, userId);
 
