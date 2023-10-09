@@ -112,19 +112,27 @@ export const updateProject = async (
 ) => {
   // only admin of project can update project
 
+  const isAdmin = await db
+    .select()
+    .from(usersInProjects)
+    .where(
+      and(
+        eq(usersInProjects.projectId, projectId),
+        eq(usersInProjects.userId, userId),
+        eq(usersInProjects.admin, true)
+      )
+    );
+
+  if (!isAdmin.length || !isAdmin[0].admin) {
+    return null;
+  }
+
   return await db
     .update(project)
     .set({
       ...args,
       updatedAt: new Date().toISOString()
     })
-    .where(
-      and(
-        eq(project.id, projectId),
-        eq(project.id, usersInProjects.projectId),
-        eq(usersInProjects.userId, userId),
-        eq(usersInProjects.admin, true)
-      )
-    )
+    .where(and(eq(project.id, projectId)))
     .returning();
 };
