@@ -29,6 +29,7 @@ export const topic = pgTable(
     };
   }
 );
+export type Topic = typeof topic.$inferSelect;
 
 export const topicRelations = relations(topic, ({ many }) => ({
   usersInTopics: many(usersInTopics),
@@ -54,6 +55,7 @@ export const session = pgTable(
     };
   }
 );
+export type Session = typeof session.$inferSelect;
 
 export const key = pgTable(
   'Key',
@@ -71,6 +73,7 @@ export const key = pgTable(
     };
   }
 );
+export type Key = typeof key.$inferSelect;
 
 export const user = pgTable(
   'User',
@@ -86,6 +89,7 @@ export const user = pgTable(
     };
   }
 );
+export type User = typeof user.$inferSelect;
 
 export const userRelations = relations(user, ({ many }) => ({
   usersInProjects: many(usersInProjects),
@@ -108,6 +112,7 @@ export const project = pgTable(
     };
   }
 );
+export type Project = typeof project.$inferSelect;
 
 export const projectRelations = relations(project, ({ many }) => ({
   usersInProjects: many(usersInProjects),
@@ -134,6 +139,7 @@ export const usersInProjects = pgTable(
     };
   }
 );
+export type UsersInProjects = typeof usersInProjects.$inferSelect;
 
 export const usersInProjectsRelations = relations(usersInProjects, ({ one }) => ({
   user: one(user),
@@ -160,6 +166,7 @@ export const usersInTopics = pgTable(
     };
   }
 );
+export type UsersInTopics = typeof usersInTopics.$inferSelect;
 
 export const usersInTopicsRelations = relations(usersInTopics, ({ one }) => ({
   user: one(user),
@@ -186,6 +193,7 @@ export const message = pgTable(
     };
   }
 );
+export type Message = typeof message.$inferSelect;
 
 export const messageRelations = relations(message, ({ one }) => ({
   topic: one(topic, {
