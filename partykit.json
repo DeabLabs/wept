@@ -1,9 +1,0 @@
-{
-  "name": "message-relay",
-  "main": "./message-relay/src/server.ts",
-  "compatibilityDate": "2023-10-09",
-  "serve": {
-    "path": "public",
-    "build": "./message-relay/src/client.ts"
-  }
-}
