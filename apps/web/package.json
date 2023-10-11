@@ -22,7 +22,7 @@
     "@tailwindcss/typography": "^0.5.10",
     "clsx": "^2.0.0",
     "daisyui": "^3.9.2",
-    "database": "*",
+    "database": "workspace:*",
     "dotenv": "^16.3.1",
     "lucia": "^2.7.1",
     "lucide-svelte": "^0.284.0",

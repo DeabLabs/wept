@@ -8,20 +8,20 @@
     "packages/*"
   ],
   "scripts": {
-    "start": "turbo run start --no-daemon",
-    "dev": "dotenv -- turbo run dev --no-daemon",
-    "build": "turbo run build --no-daemon",
-    "lint": "turbo run lint --no-daemon",
-    "check": "turbo run check --no-daemon",
-    "test": "turbo run test --no-daemon",
-    "test:ci": "turbo run test:ci --no-daemon",
-    "clean": "turbo run clean --no-daemon",
-    "format": "turbo run format --no-daemon",
-    "ci": "bun lint && turbo run build --no-daemon && turbo run ci test:ci --no-daemon",
-    "db:push": "dotenv -- turbo run db:push --no-daemon",
-    "db:seed": "dotenv -- turbo run db:seed --no-daemon",
-    "db:studio": "dotenv -- turbo run db:studio --no-daemon",
-    "db:generate": "dotenv -- turbo run db:generate --no-daemon"
+    "start": "turbo run start",
+    "dev": "dotenv -- turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "check": "turbo run check",
+    "test": "turbo run test",
+    "test:ci": "turbo run test:ci",
+    "clean": "turbo run clean",
+    "format": "turbo run format",
+    "ci": "bun lint && turbo run build && turbo run ci test:ci",
+    "db:push": "dotenv -- turbo run db:push",
+    "db:seed": "dotenv -- turbo run db:seed",
+    "db:studio": "dotenv -- turbo run db:studio",
+    "db:generate": "dotenv -- turbo run db:generate"
   },
   "repository": {
     "type": "git",
@@ -30,7 +30,6 @@
   "license": "MIT",
   "dependencies": {
     "dotenv-cli": "^7.3.0",
-    "prettier": "^2.8.0",
     "turbo": "^1.10.15",
     "typescript": "^5.0.3"
   },
