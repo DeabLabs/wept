@@ -10,7 +10,7 @@
     "format": "prettier --plugin-search-dir . --write ."
   },
   "dependencies": {
-    "database": "workspace:*",
+    "database": "*",
     "dotenv": "^16.3.1"
   },
   "devDependencies": {
