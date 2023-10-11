@@ -15,9 +15,8 @@
   },
   "dependencies": {
     "@lucia-auth/adapter-postgresql": "^2.0.1",
-    "@lucia-auth/adapter-prisma": "^3.0.2",
     "@lucia-auth/oauth": "^3.3.0",
-    "@sveltejs/adapter-vercel": "^3.0.3",
+    "@sveltejs/adapter-auto": "^2.1.0",
     "@sveltejs/kit": "^1.20.4",
     "@tailwindcss/typography": "^0.5.10",
     "clsx": "^2.0.0",
@@ -47,9 +46,6 @@
     "typescript": "^5.0.3",
     "vite": "^4.4.11",
     "vitest": "^0.34.6"
-  },
-  "resolutions": {
-    "string-width": "4.2.3"
   },
   "type": "module"
 }
