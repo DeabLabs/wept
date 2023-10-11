@@ -9,7 +9,13 @@
     },
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".vercel/**", ".partykit/**"]
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".vercel/**",
+        ".partykit/**",
+        "./svelte-kit/**"
+      ]
     },
     "db:generate": {
       "cache": false
