@@ -1,0 +1,27 @@
+{
+  "name": "messages",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "clean": "rimraf .partykit .turbo node_modules",
+    "dev": "partykit dev",
+    "deploy": "partykit deploy",
+    "lint": "prettier --plugin-search-dir . --check . && eslint .",
+    "format": "prettier --plugin-search-dir . --write ."
+  },
+  "dependencies": {
+    "db": "*",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "partykit": "^0.0.29",
+    "prettier": "^2.8.0",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.0.3"
+  },
+  "type": "module"
+}

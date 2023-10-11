@@ -1,0 +1,58 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalEnv": ["NODE_ENV"],
+  "globalDependencies": [".env"],
+  "pipeline": {
+    "start": {
+      "persistent": true,
+      "dependsOn": ["^build", "build"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "build/**", ".vercel/**", ".partykit/**"]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
+    },
+    "test": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^build"]
+    },
+    "test:ci": {
+      "cache": false,
+      "dependsOn": ["^build"]
+    },
+    "lint": {
+      "cache": false
+    },
+    "check": {
+      "cache": false
+    },
+    "ci": {
+      "cache": false,
+      "dependsOn": ["^build"]
+    },
+    "format": {
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
