@@ -49,8 +49,7 @@
     "vitest": "^0.34.6"
   },
   "resolutions": {
-    "wrap-ansi": "7.0.0",
-    "string-width": "4.1.0"
+    "string-width": "4.2.3"
   },
   "type": "module"
 }
