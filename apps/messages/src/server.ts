@@ -34,14 +34,17 @@ export default class Server implements Party.Server {
   }
 
   onClose(connection: Party.Connection<unknown>): void | Promise<void> {
+    console.log('disconnecting user', connection.id);
     this.users = this.users.filter((u) => u !== connection.id);
 
     if (this.users.length === 0) {
+      console.log('no users left, clearing messages');
       this.messages = undefined;
     }
   }
 
   async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    console.log('connecting user', conn.id);
     this.users.push(conn.id);
     const messages = await this.ensureLatestMessages();
 
