@@ -15,3 +15,9 @@ This project uses [bun](https://bun.sh) instead of node, install that first.
 bun install
 bun dev
 ```
+
+## Deployment
+
+- /apps/web hosted on vercel [vercel](https://vercel.com)
+- /apps/messages hosted on partykit [partykit](https://docs.partykit.io)
+- /packages/database hosted on [neon](https://console.neon.tech/)

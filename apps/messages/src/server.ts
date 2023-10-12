@@ -1,38 +1,69 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type * as Party from 'partykit/server';
-import type { Schema } from 'database';
+import { Queries as QueryClient, type Schema } from 'database';
+import { Pool } from '@neondatabase/serverless';
+import { getServerlessDb } from 'database/drizzle';
+import type { SDbType } from 'database/queries';
 
 export default class Server implements Party.Server {
   users: string[] = [];
-  messages: Schema.Message[] = [];
+  messages: Schema.Message[] | undefined = undefined;
+  topicId: number;
+  projectId: number;
+  db: SDbType;
+  Queries: QueryClient<SDbType>;
 
-  constructor(readonly party: Party.Party) {}
+  constructor(readonly party: Party.Party) {
+    const [projectId, topicId] = party.id.split('/');
+    this.topicId = Number(topicId);
+    this.projectId = Number(projectId);
+
+    const client = new Pool({
+      connectionString: party.env.DATABASE_URL as string
+    });
+    this.db = getServerlessDb(client);
+    this.Queries = new QueryClient(this.db);
+  }
+
+  async ensureLatestMessages() {
+    if (!this.messages) {
+      this.messages = await this.Queries.Topic.UNSAFE_getMessagesInTopic(this.topicId);
+    }
+
+    return this.messages;
+  }
 
   onClose(connection: Party.Connection<unknown>): void | Promise<void> {
     this.users = this.users.filter((u) => u !== connection.id);
   }
 
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
-    // A websocket just connected!
-    console.log(
-      `Connected:
-  id: ${conn.id}
-  room: ${this.party.id}
-  url: ${new URL(ctx.request.url).pathname}`
-    );
+  async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    const messages = await this.ensureLatestMessages();
 
-    // let's send a message to the connection
-    conn.send('hello from server');
+    conn.send(
+      JSON.stringify({
+        messages
+      })
+    );
   }
 
-  onMessage(message: string, sender: Party.Connection) {
-    // let's log the message
-    console.log(`connection ${sender.id} sent message: ${message}`);
-    // as well as broadcast it to all the other connections in the room...
-    this.party.broadcast(
-      `${sender.id}: ${message}`,
-      // ...except for the connection it came from
-      [sender.id]
+  async onMessage(message: string, sender: Party.Connection) {
+    const parsedMessage = JSON.parse(message) as { content: string; authorId: string };
+
+    const newMessage = await this.Queries.Topic.addMessageToTopic(
+      this.topicId,
+      parsedMessage.authorId,
+      parsedMessage.content
     );
+
+    if (!newMessage) {
+      return;
+    }
+
+    this.messages?.push(newMessage);
+
+    // as well as broadcast it to all the other connections in the room...
+    this.party.broadcast(JSON.stringify({ messages: this.messages }));
   }
 }
 

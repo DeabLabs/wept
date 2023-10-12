@@ -1,12 +1,8 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import { drizzle as dPg } from "drizzle-orm/postgres-js";
+import { drizzle as sPg } from "drizzle-orm/neon-serverless";
 import * as schema from "./schema";
-import { config } from "dotenv";
 
-if (process.env.NODE_ENV !== "production") {
-  config();
-}
+export const getServerlessDb = (c: Parameters<typeof sPg>[0]) =>
+  sPg(c, { schema });
 
-export const client = postgres(process.env.DATABASE_URL!);
-
-export const db = drizzle(client, { schema });
+export const getDb = (c: Parameters<typeof dPg>[0]) => dPg(c, { schema });

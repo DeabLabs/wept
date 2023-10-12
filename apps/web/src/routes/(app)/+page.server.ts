@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { Queries } from 'database';
+import { queries } from '$lib/server/queries/index.js';
 
 export const load = async ({ locals }) => {
   const session = await locals.auth.validate();
@@ -18,7 +18,7 @@ export const actions = {
     const name = form.get('name')?.toString();
 
     if (!name) {
-      throw fail(400, {
+      return fail(400, {
         createProject: {
           success: false,
           errors: {
@@ -28,7 +28,7 @@ export const actions = {
       });
     }
 
-    await Queries.Project.createProject(userId, name);
+    await queries.Project.createProject(userId, name);
 
     return { createProject: { success: true } };
   },
@@ -42,7 +42,7 @@ export const actions = {
     const projectId = Number(form.get('projectId')?.toString());
 
     if (!name) {
-      throw fail(400, {
+      return fail(400, {
         createTopic: {
           success: false,
           errors: {
@@ -53,7 +53,7 @@ export const actions = {
     }
 
     if (!projectId || isNaN(projectId)) {
-      throw fail(400, {
+      return fail(400, {
         createTopic: {
           success: false,
           errors: {
@@ -63,7 +63,7 @@ export const actions = {
       });
     }
 
-    await Queries.Topic.createTopic(projectId, userId, name);
+    await queries.Topic.createTopic(projectId, userId, name);
 
     return { createTopic: { success: true } };
   }

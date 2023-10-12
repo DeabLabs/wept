@@ -1,5 +1,10 @@
-export type GetProjectsQueryType<T extends keyof typeof import('database')['Queries']['Project']> =
-  Awaited<ReturnType<typeof import('database')['Queries']['Project'][T]>>;
+import type { Queries } from 'database';
+import type { DbType } from 'database/queries';
 
-export type GetTopicsQueryType<T extends keyof typeof import('database')['Queries']['Topic']> =
-  Awaited<ReturnType<typeof import('database')['Queries']['Topic'][T]>>;
+export type GetProjectsQueryType<T extends keyof Queries<DbType>['Project']> = Awaited<
+  ReturnType<Queries<DbType>['Project'][T]>
+>;
+
+export type GetTopicsQueryType<T extends keyof Queries<DbType>['Project']> = Awaited<
+  ReturnType<Queries<DbType>['Project'][T]>
+>;

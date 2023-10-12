@@ -14,7 +14,8 @@
         "build/**",
         ".vercel/**",
         ".partykit/**",
-        "./svelte-kit/**"
+        "./svelte-kit/**",
+        "./public/dist/**"
       ]
     },
     "db:generate": {

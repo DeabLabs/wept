@@ -1,12 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { Queries } from 'database';
+import { queries } from '$lib/server/queries/index.js';
 
 export const load = async ({ locals, params }) => {
   const session = await locals.auth.validate();
   if (!session) throw redirect(302, '/login');
 
   const topicId = Number(params.topicId);
-  const topic = await Queries.Topic.getTopic(topicId, session.user.userId);
+  const topic = await queries.Topic.getAuthorizedTopic(topicId, session.user.userId);
 
   if (!topic) {
     throw redirect(302, '/dashboard');
@@ -26,7 +26,7 @@ export const actions = {
     const userId = session.user.userId;
     const topicId = Number(params.topicId);
 
-    await Queries.Topic.deleteTopic(topicId, userId);
+    await queries.Topic.deleteTopic(topicId, userId);
 
     throw redirect(302, `/dashboard`);
   },
@@ -42,7 +42,7 @@ export const actions = {
     const context = form.get('context')?.toString();
 
     if (!name) {
-      throw fail(400, {
+      return fail(400, {
         updateTopic: {
           success: false,
           errors: {
@@ -52,7 +52,7 @@ export const actions = {
       });
     }
 
-    await Queries.Topic.updateTopic(topicId, userId, { name, description, context });
+    await queries.Topic.updateTopic(topicId, userId, { name, description, context });
 
     return { updateTopic: { success: true } };
   }

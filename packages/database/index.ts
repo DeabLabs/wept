@@ -1,3 +1,3 @@
-export { db, client } from "./drizzle";
 export * as Schema from "./schema";
-export * as Queries from "./queries/index";
+export { getDb } from "./drizzle";
+export { Queries } from "./queries/index";

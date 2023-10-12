@@ -3,14 +3,18 @@
   import type { GetProjectsQueryType } from '$lib/server/queries/types';
   import { PlusCircle } from 'lucide-svelte';
 
-  export let projects: GetProjectsQueryType<'getAuthorizedProjectsWithTopics'> = [];
+  export let projects: GetProjectsQueryType<'getUserProjectsWithTopics'> = [];
 </script>
 
 {#each projects as project}
   <li>
     <details open={project.topics.length > 0}>
       <summary class="flex justify-between text-lg sm:text-sm">
-        <a href={`/projects/${project.id}`} class="hover:underline">{project.name}</a>
+        {#if project.admin}
+          <a href={`/projects/${project.id}`} class="hover:underline">{project.name}</a>
+        {:else}
+          <span>{project.name}</span>
+        {/if}
       </summary>
       <ul>
         {#each project.topics as topic}
@@ -18,13 +22,16 @@
             <a href={`/projects/${project.id}/topics/${topic.id}/chat`}>{topic.name}</a>
           </li>
         {/each}
-        <li>
-          <MenuCreateInput action="/?/createTopic">
-            <svelte:fragment slot="button"><PlusCircle size={16} />Create new Topic</svelte:fragment
-            >
-            <input slot="open" name="projectId" hidden readonly value={project.id} />
-          </MenuCreateInput>
-        </li>
+        {#if project.admin}
+          <li>
+            <MenuCreateInput action="/?/createTopic">
+              <svelte:fragment slot="button"
+                ><PlusCircle size={16} />Create new Topic</svelte:fragment
+              >
+              <input slot="open" name="projectId" hidden readonly value={project.id} />
+            </MenuCreateInput>
+          </li>
+        {/if}
       </ul>
     </details>
   </li>

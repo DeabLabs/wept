@@ -7,6 +7,7 @@ dist
 .env
 .env.*
 !.env.example
+public/dist
 
 # Ignore files for PNPM, NPM and YARN
 pnpm-lock.yaml

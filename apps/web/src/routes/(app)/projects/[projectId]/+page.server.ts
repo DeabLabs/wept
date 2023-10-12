@@ -1,12 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { Queries } from 'database';
+import { queries } from '$lib/server/queries/index.js';
 
 export const load = async ({ locals, params }) => {
   const session = await locals.auth.validate();
   if (!session) throw redirect(302, '/login');
 
   const projectId = Number(params.projectId);
-  const project = await Queries.Project.getAuthorizedProject(projectId, session.user.userId);
+  const project = await queries.Project.getAuthorizedProject(projectId, session.user.userId);
 
   if (!project) {
     throw redirect(302, '/dashboard');
@@ -30,7 +30,7 @@ export const actions = {
     const description = form.get('description')?.toString();
 
     if (!name) {
-      throw fail(400, {
+      return fail(400, {
         updateProject: {
           success: false,
           errors: {
@@ -40,7 +40,7 @@ export const actions = {
       });
     }
 
-    await Queries.Project.updateProject(projectId, userId, { name, context, description });
+    await queries.Project.updateProject(projectId, userId, { name, context, description });
 
     return { updateProject: { success: true } };
   },
@@ -51,7 +51,7 @@ export const actions = {
     const userId = session.user.userId;
     const projectId = Number(params.projectId);
 
-    await Queries.Project.deleteProject(projectId, userId);
+    await queries.Project.deleteProject(projectId, userId);
 
     throw redirect(302, `/dashboard`);
   }
