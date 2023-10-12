@@ -134,8 +134,8 @@
         </li>
       {/each}
     </ul>
-    <div class="divider" />
     {#if data.admin}
+      <div class="divider" />
       <form class="mt-4" method="post" use:enhance action="?/invite">
         <h3 class="text-lg">Invite new Member</h3>
         <div class="flex gap-4 items-center">
