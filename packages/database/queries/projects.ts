@@ -35,10 +35,21 @@ export class ProjectQueries {
     const result = await this.db
       .select()
       .from(usersInProjects)
-      .innerJoin(project, eq(usersInProjects.projectId, project.id))
+      .innerJoin(
+        project,
+        and(
+          eq(usersInProjects.projectId, project.id),
+          eq(usersInProjects.userId, userId)
+        )
+      )
       .leftJoin(topic, eq(topic.projectId, project.id))
-      .leftJoin(usersInTopics, eq(usersInTopics.topicId, topic.id))
-      .where(and(eq(usersInProjects.userId, userId)));
+      .leftJoin(
+        usersInTopics,
+        and(
+          eq(usersInTopics.topicId, topic.id),
+          eq(usersInTopics.userId, userId)
+        )
+      );
 
     const formattedResult: Record<
       Project["id"],
