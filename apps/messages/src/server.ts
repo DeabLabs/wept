@@ -35,9 +35,14 @@ export default class Server implements Party.Server {
 
   onClose(connection: Party.Connection<unknown>): void | Promise<void> {
     this.users = this.users.filter((u) => u !== connection.id);
+
+    if (this.users.length === 0) {
+      this.messages = undefined;
+    }
   }
 
   async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+    this.users.push(conn.id);
     const messages = await this.ensureLatestMessages();
 
     conn.send(
