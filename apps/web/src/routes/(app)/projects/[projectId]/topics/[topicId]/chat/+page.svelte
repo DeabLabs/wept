@@ -6,6 +6,7 @@
   import type { Schema } from 'database';
   import { Info, Settings, X } from 'lucide-svelte';
   import PartySocket from 'partysocket';
+  import { onDestroy } from 'svelte';
 
   export let data;
   export let form;
@@ -21,6 +22,10 @@
 
   let messages: (Schema.Message | OptimisticMessage)[] = [];
   const socket = new PartySocket(data.partyOptions);
+
+  onDestroy(() => {
+    socket.close();
+  });
 
   socket.onmessage = (event) => {
     const { messages: newMessages } = JSON.parse(event.data) as { messages: Schema.Message[] };
