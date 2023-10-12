@@ -27,7 +27,7 @@ export default class Server implements Party.Server {
 
   async ensureLatestMessages() {
     if (!this.messages) {
-      this.messages = await this.Queries.Topic.UNSAFE_getMessagesInTopic(this.topicId);
+      this.messages = await this.Queries.Topic.UNSAFE_getMessagesInTopic(this.topicId, 'asc');
     }
 
     return this.messages;
