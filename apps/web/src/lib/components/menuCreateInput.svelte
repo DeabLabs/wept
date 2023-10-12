@@ -23,9 +23,9 @@
     use:enhance={() => {
       loading = true;
       return async ({ result, update }) => {
+        loading = false;
         await update();
         await applyAction(result);
-        loading = false;
         close();
       };
     }}

@@ -9,7 +9,7 @@
   export let drawerId: string;
 </script>
 
-<div class="navbar bg-base-100">
+<div class="navbar bg-base-100 sticky top-0 z-10">
   <div class="flex-1">
     <DrawerToggle {drawerId}>
       <Menu />

@@ -8,6 +8,7 @@
   import PartySocket from 'partysocket';
   import { onDestroy } from 'svelte';
   import type { ActionData, PageData } from './$types';
+  import clsx from 'clsx';
 
   export let data: PageData;
   export let form: ActionData;
@@ -50,10 +51,11 @@
 </script>
 
 <Container
-  className="not-prose flex flex-col justify-center items-center sm:ml-0 max-w-full w-full"
+  notProse={true}
+  className="flex flex-col justify-center items-center sm:ml-0 w-full h-full"
 >
   <ul
-    class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl w-full sm:w-auto"
+    class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl w-full sm:w-auto sticky top-20 sm:top-16 z-10"
   >
     <li>
       <button
@@ -81,7 +83,7 @@
       <li class="hidden sm:flex"><a href={data.settingsLink}><Settings /></a></li>
     {/if}
   </ul>
-  <ul class="w-full px-10 sm:px-40 py-10 flex flex-col gap-2">
+  <ul class="w-full px-10 py-10 flex flex-col gap-2 h-full">
     {#each messages as message}
       <li class="w-full flex gap-4 items-center">
         <Avatar
@@ -93,9 +95,12 @@
       </li>
     {/each}
   </ul>
-  <form on:submit|preventDefault={handleSubmit}>
-    <input type="text" name="content" />
-    <button type="submit">Send</button>
+  <form
+    on:submit|preventDefault={handleSubmit}
+    class="flex bg-base-300 sticky bottom-0 w-full join p-4 sm:rounded-none"
+  >
+    <input type="text" name="content" class="join-item input input-bordered w-full" />
+    <button type="submit" class="join-item btn btn-primary rounded-lg">Send</button>
   </form>
 </Container>
 
