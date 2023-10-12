@@ -21,6 +21,10 @@
     "db:generate": {
       "cache": false
     },
+    "deploy": {
+      "cache": false,
+      "dependsOn": ["^build"]
+    },
     "dev": {
       "cache": false,
       "persistent": true,

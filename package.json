@@ -13,6 +13,7 @@
     "build": "turbo run build",
     "lint": "turbo run lint",
     "check": "turbo run check",
+    "deploy": "turbo run deploy",
     "test": "turbo run test",
     "test:ci": "turbo run test:ci",
     "clean": "turbo run clean",
