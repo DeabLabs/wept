@@ -10,9 +10,9 @@
   "scripts": {
     "start": "turbo run start",
     "dev": "dotenv -- turbo run dev",
-    "build": "turbo run build",
+    "build": "dotenv -- turbo run build",
     "lint": "turbo run lint",
-    "check": "turbo run check",
+    "check": "dotenv -- turbo run check",
     "deploy": "turbo run deploy",
     "test": "turbo run test",
     "test:ci": "turbo run test:ci",

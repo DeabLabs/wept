@@ -94,7 +94,7 @@
 
     messages = [...messages, optimisticMessage];
 
-    socket.send(JSON.stringify(optimisticMessage));
+    client.send({ type: 'addMessage', ...optimisticMessage });
 
     event.currentTarget.reset();
 
