@@ -1,4 +1,4 @@
-name: Deploy Drizzle Schema
+name: Deploy PartyKit
 
 on:
   push:
@@ -16,14 +16,15 @@ jobs:
         id: filter
         with:
           filters: |
-            drizzle:
-              - 'packages/database/**'
+            party:
+              - 'apps/messages/**'
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
       - run: bun install
-        if: steps.filter.outputs.drizzle == 'true'
-      - run: bun run db:push
-        if: steps.filter.outputs.drizzle == 'true'
+        if: steps.filter.outputs.party == 'true'
+      - run: bun run deploy --filter=messages
+        if: steps.filter.outputs.party == 'true'
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.PARTYKIT_GITHUB_TOKEN }}
+          GITHUB_LOGIN: ${{ secrets.PARTYKIT_GITHUB_LOGIN }}
