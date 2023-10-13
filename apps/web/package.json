@@ -25,7 +25,9 @@
     "dotenv": "^16.3.1",
     "lucia": "^2.7.1",
     "lucide-svelte": "^0.284.0",
-    "partysocket": "0.0.9",
+    "mclient": "*",
+    "partyrpc": "*",
+    "partysocket": "0.0.10",
     "postgres": "^3.3.5",
     "svelte": "^4.0.5"
   },

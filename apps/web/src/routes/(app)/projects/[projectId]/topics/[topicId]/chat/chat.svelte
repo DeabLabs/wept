@@ -6,6 +6,8 @@
   import type { Schema } from 'database';
   import { Info, Settings, X } from 'lucide-svelte';
   import PartySocket from 'partysocket';
+  import { createPartyClient } from 'partyrpc/src/client';
+  import type { SafePartyEvents, SafePartyResponses } from 'mclient';
   import { onDestroy, tick } from 'svelte';
   import type { ActionData, PageData } from './$types';
 
@@ -21,8 +23,12 @@
     authorId: string;
   };
 
+  let activeUserIds = new Set<string>();
+  $: activeMembers = data.topic.members.filter((member) => activeUserIds.has(member.id));
+
   let messages: (Schema.Message | OptimisticMessage)[] = [];
   const socket = new PartySocket(data.partyOptions);
+  const client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
 
   function scrollToEndOfMessages(smooth = true) {
     // get the last child element of #messages and then scroll to it
@@ -39,8 +45,16 @@
     socket.close();
   });
 
-  socket.onmessage = (event) => {
-    const { messages: newMessages } = JSON.parse(event.data) as { messages: Schema.Message[] };
+  client.on('Init', (e) => {
+    messages = e.messages;
+    activeUserIds = new Set(e.userIds);
+    tick().then(() => {
+      scrollToEndOfMessages(false);
+    });
+  });
+
+  client.on('SetMessages', (e) => {
+    const newMessages = e.messages;
     const empty = messages.length === 0;
     messages = newMessages;
 
@@ -56,7 +70,19 @@
         scrollToEndOfMessages();
       });
     }
-  };
+  });
+
+  client.on('UserJoined', async (e) => {
+    console.log(e.userId, 'joined');
+    activeUserIds.add(e.userId);
+    activeUserIds = new Set(activeUserIds);
+  });
+
+  client.on('UserLeft', async (e) => {
+    console.log(e.userId, 'left');
+    activeUserIds.delete(e.userId);
+    activeUserIds = new Set(activeUserIds);
+  });
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
     const formData = new FormData(event.currentTarget);
@@ -105,7 +131,7 @@
           }
         }}
       >
-        <AvatarGroup partialUsers={data.topic.members} />
+        <AvatarGroup partialUsers={activeMembers} />
       </button>
     </li>
     {#if data.topic.admin}
@@ -143,7 +169,7 @@
     <ul class="sm:hidden flex gap-2 w-full justify-between items-center mt-1">
       <li>
         <span>
-          <AvatarGroup partialUsers={data.topic.members} />
+          <AvatarGroup partialUsers={activeMembers} />
         </span>
       </li>
       {#if data.admin}

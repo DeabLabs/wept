@@ -3,13 +3,13 @@
 
   export let partialUsers: { id: string; avatar?: string | null; username: string }[] = [];
 
-  const firstThreeUsers = partialUsers.slice(0, 3);
-  const remainingUserCount = partialUsers.length - firstThreeUsers.length;
+  $: firstThreeUsers = partialUsers.slice(0, 3);
+  $: remainingUserCount = partialUsers.length - firstThreeUsers.length;
 </script>
 
 <div class="avatar-group -space-x-6 hover:-space-x-2 transition-all">
   {#each firstThreeUsers as user}
-    <Avatar avatar={user.avatar} />
+    <Avatar avatar={user.avatar} animate={true} />
   {/each}
   {#if remainingUserCount > 0}
     <div class="avatar placeholder">

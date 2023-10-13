@@ -1,79 +1,63 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type * as Party from 'partykit/server';
-import { Queries as QueryClient, type Schema } from 'database';
+import { Queries as QueryClient } from 'database';
 import { Pool } from '@neondatabase/serverless';
 import { getServerlessDb } from 'database/drizzle';
-import type { SDbType } from 'database/queries';
+import { partyEvents } from 'mclient';
+import type { ClientContext } from 'mclient';
 
 export default class Server implements Party.Server {
-  users: string[] = [];
-  messages: Schema.Message[] | undefined = undefined;
-  topicId: number;
-  projectId: number;
-  db: SDbType;
-  Queries: QueryClient<SDbType>;
+  context: ClientContext;
 
   constructor(readonly party: Party.Party) {
     const [projectId, topicId] = party.id.split('/');
-    this.topicId = Number(topicId);
-    this.projectId = Number(projectId);
 
     const client = new Pool({
       connectionString: party.env.DATABASE_URL as string
     });
-    this.db = getServerlessDb(client);
-    this.Queries = new QueryClient(this.db);
-  }
 
-  async ensureLatestMessages() {
-    if (!this.messages) {
-      console.log("messages don't exist, fetching them");
-      this.messages = await this.Queries.Topic.UNSAFE_getMessagesInTopic(this.topicId, 'asc');
-      console.log('messages fetched');
-    }
+    const db = getServerlessDb(client);
 
-    return this.messages;
+    this.context = {
+      users: new Set<string>(),
+      messages: undefined,
+      topicId: Number(topicId),
+      projectId: Number(projectId),
+      Queries: new QueryClient(db),
+      async ensureLatestMessages() {
+        if (!this.messages) {
+          console.log("messages don't exist, fetching them");
+          this.messages = await this.Queries.Topic.UNSAFE_getMessagesInTopic(this.topicId, 'asc');
+          console.log('messages fetched');
+        }
+
+        return this.messages;
+      }
+    };
   }
 
   onClose(connection: Party.Connection<unknown>): void | Promise<void> {
     console.log('disconnecting user', connection.id);
-    this.users = this.users.filter((u) => u !== connection.id);
+    this.context.users.delete(connection.id);
+    partyEvents.broadcast(this.party, { type: 'UserLeft', userId: connection.id });
 
-    if (this.users.length === 0) {
+    if (this.context.users.size === 0) {
       console.log('no users left, clearing messages');
-      this.messages = undefined;
+      this.context.messages = undefined;
     }
   }
 
   async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     console.log('connecting user', conn.id);
-    this.users.push(conn.id);
-    const messages = await this.ensureLatestMessages();
+    this.context.users.add(conn.id);
+    const messages = await this.context.ensureLatestMessages();
 
-    conn.send(
-      JSON.stringify({
-        messages
-      })
-    );
-  }
+    partyEvents.broadcast(this.party, { type: 'UserJoined', userId: conn.id });
+    partyEvents.send(conn, { type: 'Init', messages, userIds: Array.from(this.context.users) });
 
-  async onMessage(message: string, sender: Party.Connection) {
-    const parsedMessage = JSON.parse(message) as { content: string; authorId: string };
-
-    const newMessage = await this.Queries.Topic.addMessageToTopic(
-      this.topicId,
-      parsedMessage.authorId,
-      parsedMessage.content
-    );
-
-    if (!newMessage) {
-      return;
-    }
-
-    this.messages?.push(newMessage);
-
-    // as well as broadcast it to all the other connections in the room...
-    this.party.broadcast(JSON.stringify({ messages: this.messages }));
+    conn.addEventListener('message', async (event) => {
+      partyEvents.onMessage(event.data, conn, this.party, this.context);
+    });
   }
 }
 

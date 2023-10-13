@@ -1,0 +1,31 @@
+{
+  "name": "partyrpc",
+  "type": "module",
+  "version": "0.1.1",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "bun run typecheck",
+    "clean": "rimraf dist node_modules .turbo"
+  },
+  "dependencies": {
+    "partysocket": "0.0.10",
+    "react": "^18.2.0",
+    "valibot": "^0.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/react": "^18.2.20",
+    "partykit": "^0.0.29",
+    "rimraf": "^5.0.5",
+    "tsup": "^7.2.0",
+    "typescript": "^5.0.3"
+  },
+  "optionalDependencies": {
+    "react": "^18.2.0"
+  },
+  "files": [
+    "src/**"
+  ],
+  "sideEffects": false
+}
