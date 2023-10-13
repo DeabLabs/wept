@@ -18,6 +18,7 @@ jobs:
           filters: |
             drizzle:
               - 'packages/database/**'
+              - '.github/workflows/deploy-drizzle.yml'
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
