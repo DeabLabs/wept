@@ -11,7 +11,11 @@
     <details open={project.topics.length > 0}>
       <summary class="flex justify-between text-lg sm:text-sm">
         {#if project.admin}
-          <a href={`/projects/${project.id}`} class="hover:underline">{project.name}</a>
+          <a href={`/projects/${project.id}`} class="hover:underline">
+            <span class="max-w-full whitespace-nowrap text-ellipsis overflow-hidden">
+              {project.name}
+            </span>
+          </a>
         {:else}
           <span>{project.name}</span>
         {/if}
@@ -19,7 +23,11 @@
       <ul>
         {#each project.topics as topic}
           <li>
-            <a href={`/projects/${project.id}/topics/${topic.id}/chat`}>{topic.name}</a>
+            <a href={`/projects/${project.id}/topics/${topic.id}/chat`}>
+              <span class="max-w-full whitespace-nowrap text-ellipsis overflow-hidden"
+                >{topic.name}</span
+              >
+            </a>
           </li>
         {/each}
         {#if project.admin}
