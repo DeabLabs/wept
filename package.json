@@ -36,5 +36,9 @@
   },
   "engines": {
     "node": "18"
+  },
+  "packageManager": "yarn@1.22.19",
+  "resolutions": {
+    "string-width": "4.2.3"
   }
 }
