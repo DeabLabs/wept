@@ -139,7 +139,9 @@
           <AvatarGroup partialUsers={data.topic.members} />
         </span>
       </li>
-      <li><a href={data.settingsLink}><Settings /></a></li>
+      {#if data.admin}
+        <li><a href={data.settingsLink}><Settings /></a></li>
+      {/if}
     </ul>
     <p class="py-4">
       {#if data.topic.description}
