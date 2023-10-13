@@ -44,7 +44,6 @@
     const empty = messages.length === 0;
     messages = newMessages;
 
-    console.log(window.scrollY, window.innerHeight, window.outerHeight);
     if (empty && messages.length !== 0) {
       tick().then(() => {
         scrollToEndOfMessages(false);
