@@ -27,7 +27,9 @@ export default class Server implements Party.Server {
 
   async ensureLatestMessages() {
     if (!this.messages) {
+      console.log("messages don't exist, fetching them");
       this.messages = await this.Queries.Topic.UNSAFE_getMessagesInTopic(this.topicId, 'asc');
+      console.log('messages fetched');
     }
 
     return this.messages;
