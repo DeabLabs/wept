@@ -4,6 +4,6 @@
   export let notProse = false;
 </script>
 
-<section class={clsx('px-4 sm:px-0 pt-4 sm:pt-0 w-full', !notProse && 'prose', className)}>
+<section class={clsx('px-4 pt-4 w-full', !notProse && 'prose', className)}>
   <slot />
 </section>

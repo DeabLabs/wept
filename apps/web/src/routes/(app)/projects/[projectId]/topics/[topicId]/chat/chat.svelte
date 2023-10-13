@@ -6,9 +6,8 @@
   import type { Schema } from 'database';
   import { Info, Settings, X } from 'lucide-svelte';
   import PartySocket from 'partysocket';
-  import { onDestroy } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import type { ActionData, PageData } from './$types';
-  import clsx from 'clsx';
 
   export let data: PageData;
   export let form: ActionData;
@@ -25,13 +24,31 @@
   let messages: (Schema.Message | OptimisticMessage)[] = [];
   const socket = new PartySocket(data.partyOptions);
 
+  function scrollToEndOfMessages(smooth = true) {
+    // get the last child element of #messages and then scroll to it
+    const messagesEl = document.getElementById('messages');
+    if (messagesEl instanceof HTMLElement) {
+      const lastMessageEl = messagesEl.lastElementChild;
+      if (lastMessageEl instanceof HTMLElement) {
+        lastMessageEl.scrollIntoView({ behavior: smooth ? 'smooth' : undefined });
+      }
+    }
+  }
+
   onDestroy(() => {
     socket.close();
   });
 
   socket.onmessage = (event) => {
     const { messages: newMessages } = JSON.parse(event.data) as { messages: Schema.Message[] };
+    const empty = messages.length === 0;
     messages = newMessages;
+
+    if (empty && messages.length !== 0) {
+      tick().then(() => {
+        scrollToEndOfMessages(false);
+      });
+    }
   };
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
@@ -42,23 +59,28 @@
       authorId: data.partyOptions.id
     };
 
-    messages.push(optimisticMessage);
+    messages = [...messages, optimisticMessage];
 
     socket.send(JSON.stringify(optimisticMessage));
 
     event.currentTarget.reset();
+
+    tick().then(() => {
+      scrollToEndOfMessages();
+    });
   }
 </script>
 
 <Container
   notProse={true}
-  className="flex flex-col justify-center items-center sm:ml-0 w-full h-full"
+  className="flex flex-col justify-center items-center sm:mx-0 w-full h-full pl-0"
 >
   <ul
     class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl w-full sm:w-auto sticky top-20 sm:top-16 z-10"
   >
-    <li>
+    <li class="h-full">
       <button
+        class="h-full flex items-center"
         on:click={() => {
           const el = document.getElementById('info-modal');
           if (el instanceof HTMLDialogElement) {
@@ -83,7 +105,7 @@
       <li class="hidden sm:flex"><a href={data.settingsLink}><Settings /></a></li>
     {/if}
   </ul>
-  <ul class="w-full px-10 py-10 flex flex-col gap-2 h-full">
+  <ul class="w-full px-10 py-5 flex flex-col gap-2 h-full" id="messages">
     {#each messages as message}
       <li class="w-full flex gap-4 items-center">
         <Avatar

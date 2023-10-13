@@ -9,7 +9,7 @@
   export let drawerId: string;
 </script>
 
-<div class="navbar bg-base-100 sticky top-0 z-10">
+<div class="navbar bg-base-100 sticky top-0 z-20">
   <div class="flex-1">
     <DrawerToggle {drawerId}>
       <Menu />
@@ -17,10 +17,10 @@
   </div>
   <div class="flex-none gap-2">
     <div class="dropdown dropdown-end">
-      <button tabindex="0" class="btn btn-ghost btn-circle avatar">
+      <button tabindex="0" class="btn btn-ghost btn-circle avatar mr-4">
         <Avatar avatar={user.avatar} />
       </button>
-      <ul class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-200 rounded-box w-52">
+      <ul class="mt-3 z-20 p-2 shadow menu menu-sm dropdown-content bg-base-200 rounded-box w-52">
         <li class="menu-title">Hey, {user.username}</li>
         <li>
           <a href="/profile">Profile</a>
