@@ -44,9 +44,17 @@
     const empty = messages.length === 0;
     messages = newMessages;
 
+    console.log(window.scrollY, window.innerHeight, window.outerHeight);
     if (empty && messages.length !== 0) {
       tick().then(() => {
         scrollToEndOfMessages(false);
+      });
+    } else if (
+      // if window is scrolled to the bottom, scroll to the bottom again when a new message arrives
+      window.scrollY >= window.outerHeight
+    ) {
+      tick().then(() => {
+        scrollToEndOfMessages();
       });
     }
   };
