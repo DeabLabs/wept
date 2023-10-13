@@ -26,5 +26,5 @@ jobs:
       - run: bun run deploy --filter=messages
         if: steps.filter.outputs.party == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.PARTYKIT_GITHUB_TOKEN }}
-          GITHUB_LOGIN: ${{ secrets.PARTYKIT_GITHUB_LOGIN }}
+          PARTYKIT_TOKEN: ${{ secrets.PARTYKIT_GITHUB_TOKEN }}
+          PARTYKIT_LOGIN: ${{ secrets.PARTYKIT_GITHUB_LOGIN }}
