@@ -10,6 +10,7 @@
   import type { SafePartyEvents, SafePartyResponses } from 'mclient';
   import { onDestroy, tick } from 'svelte';
   import type { ActionData, PageData } from './$types';
+  import clsx from 'clsx';
 
   export let data: PageData;
   export let form: ActionData;
@@ -25,6 +26,12 @@
 
   let activeUserIds = new Set<string>();
   $: activeMembers = data.topic.members.filter((member) => activeUserIds.has(member.id));
+
+  let inputHeight = 0;
+  $: chatStyles = `min-height: calc(100vh - ${inputHeight}px - 9.5rem);`;
+
+  $: userClass = (authorId: string) =>
+    authorId === data.user.id ? 'text-info' : 'text-primary-content';
 
   let messages: (Schema.Message | OptimisticMessage)[] = [];
   const socket = new PartySocket(data.partyOptions);
@@ -106,10 +113,10 @@
 
 <Container
   notProse={true}
-  className="flex flex-col justify-center items-center sm:mx-0 w-full h-full pl-0"
+  className="flex flex-col justify-center items-center sm:mx-0 w-full h-full pl-0 pt-0"
 >
   <ul
-    class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl w-full sm:w-auto sticky top-20 sm:top-16 z-10"
+    class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl sticky top-2 p-2 z-20 mt-0"
   >
     <li class="h-full">
       <button
@@ -119,10 +126,14 @@
           if (el instanceof HTMLDialogElement) {
             el.showModal();
           }
-        }}><Info /><span class="text-lg font-bold text-info">{data.topic.name}</span></button
+        }}
+        ><Info /><span
+          class="sm:text-lg sm:max-w-[15rem] md:max-w-sm 2xl:max-w-4xl font-bold text-info text-ellipsis max-w-[5rem] overflow-hidden whitespace-nowrap"
+          >{data.topic.name}</span
+        ></button
       >
     </li>
-    <li class="hidden sm:flex">
+    <li>
       <button
         on:click={() => {
           const el = document.getElementById('members-modal');
@@ -138,21 +149,44 @@
       <li class="hidden sm:flex"><a href={data.settingsLink}><Settings /></a></li>
     {/if}
   </ul>
-  <ul class="w-full px-10 py-5 flex flex-col gap-2 h-full" id="messages">
-    {#each messages as message}
-      <li class="w-full flex gap-4 items-center">
-        <Avatar
-          size="sm"
-          tooltip={memberMap.get(message.authorId)?.username}
-          avatar={memberMap.get(message.authorId)?.avatar}
-        />
-        {message.content}
+  <ul class="w-full px-10 py-5 flex flex-col h-full gap-2 pt-10" id="messages" style={chatStyles}>
+    {#each messages as message, i}
+      <li class="w-full flex gap-2">
+        {#if messages[i - 1]?.authorId !== message.authorId}
+          <Avatar
+            className="self-start"
+            size="sm"
+            tooltip={memberMap.get(message.authorId)?.username}
+            avatar={memberMap.get(message.authorId)?.avatar}
+          />
+        {:else}
+          <!-- Add some space so that message still lines up with messages that have avatars -->
+          <div class="w-6" />
+        {/if}
+        <div class="w-full flex flex-col gap-2">
+          {#if messages[i - 1]?.authorId !== message.authorId}
+            <div class="w-full flex justify-between items-center">
+              <span class={clsx('leading-none font-semibold', userClass(message.authorId))}
+                >{memberMap.get(message.authorId)?.username}</span
+              >
+              <span class="text-xs text-neutral-content italic font-light"
+                >{new Date(
+                  'createdAt' in message ? message.createdAt : Date.now()
+                ).toLocaleString()}</span
+              >
+            </div>
+          {/if}
+          <p class="leading-relaxed text-base-content">
+            {message.content}
+          </p>
+        </div>
       </li>
     {/each}
   </ul>
   <form
     on:submit|preventDefault={handleSubmit}
     class="flex bg-base-300 sticky bottom-0 w-full join p-4 sm:rounded-none"
+    bind:clientHeight={inputHeight}
   >
     <input type="text" name="content" class="join-item input input-bordered w-full" />
     <button type="submit" class="join-item btn btn-primary rounded-lg">Send</button>
@@ -162,9 +196,10 @@
 <dialog id="info-modal" class="modal">
   <div class="modal-box">
     <h3 class="font-bold text-lg flex justify-between">
-      <span class="text-xl text-info">{data.topic.name}</span><span
-        >{data.topic.members.length} {memberCountLabel}</span
-      >
+      <span
+        class="text-xl text-info overflow-hidden text-ellipsis max-w-[18rem] whitespace-nowrap tooltip"
+        data-tip={data.topic.name}>{data.topic.name}</span
+      ><span>{data.topic.members.length} {memberCountLabel}</span>
     </h3>
     <ul class="sm:hidden flex gap-2 w-full justify-between items-center mt-1">
       <li>

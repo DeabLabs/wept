@@ -3,6 +3,7 @@
   import clsx from 'clsx';
   import { fly } from 'svelte/transition';
 
+  export let className: string | undefined = undefined;
   export let animate = false;
   export let avatar: string | null | undefined = undefined;
   export let size: 'sm' | 'md' | 'lg' = 'md';
@@ -16,7 +17,7 @@
 </script>
 
 <div
-  class={clsx('avatar', tooltip && 'tooltip')}
+  class={clsx('avatar', tooltip && 'tooltip', className)}
   data-tip={tooltip}
   in:fly={{
     y: 100,
