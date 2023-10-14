@@ -161,7 +161,8 @@
           />
         {:else}
           <!-- Add some space so that message still lines up with messages that have avatars -->
-          <div class="w-6" />
+          <!-- this width is w-6 + 4px border from the avatar default width -->
+          <div class="w-[26px]" />
         {/if}
         <div class="w-full flex flex-col gap-2">
           {#if messages[i - 1]?.authorId !== message.authorId}
@@ -176,7 +177,10 @@
               >
             </div>
           {/if}
-          <p class="leading-relaxed text-base-content">
+          <p
+            class="leading-relaxed text-base-content break-words hyphens-auto max-w-full"
+            style="word-wrap: anywhere;"
+          >
             {message.content}
           </p>
         </div>
