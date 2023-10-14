@@ -36,6 +36,7 @@
           <span class="label-text">Name</span>
         </label>
         <input
+          id="name"
           name="name"
           type="text"
           required
@@ -49,6 +50,7 @@
           <span class="label-text">Description</span>
         </label>
         <textarea
+          id="description"
           name="description"
           class="textarea textarea-bordered h-24"
           placeholder="This project is about..."
@@ -65,6 +67,7 @@
           <span class="label-text">Context</span>
         </label>
         <textarea
+          id="context"
           name="context"
           class="textarea textarea-bordered h-24"
           placeholder="This project is about..."

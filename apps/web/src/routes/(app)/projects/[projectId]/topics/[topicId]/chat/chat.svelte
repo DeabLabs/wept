@@ -219,6 +219,7 @@
               <span class="label-text">Member ID</span>
             </label>
             <input
+              id="member-id"
               type="text"
               placeholder="Member ID"
               name="member-id"
