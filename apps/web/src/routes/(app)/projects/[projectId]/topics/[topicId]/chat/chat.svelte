@@ -149,7 +149,11 @@
       <li class="hidden sm:flex"><a href={data.settingsLink}><Settings /></a></li>
     {/if}
   </ul>
-  <ul class="w-full px-10 py-5 flex flex-col h-full gap-2 pt-10" id="messages" style={chatStyles}>
+  <ul
+    class="w-full px-4 sm:px-10 py-5 flex flex-col h-full gap-2 pt-10"
+    id="messages"
+    style={chatStyles}
+  >
     {#each messages as message, i}
       <li class="w-full flex gap-2">
         {#if messages[i - 1]?.authorId !== message.authorId}
