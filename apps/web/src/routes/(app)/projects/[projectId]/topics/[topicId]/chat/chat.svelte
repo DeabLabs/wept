@@ -3,39 +3,14 @@
   import Avatar from '$lib/components/avatar.svelte';
   import AvatarGroup from '$lib/components/avatarGroup.svelte';
   import Container from '$lib/components/container.svelte';
-  import type { Schema } from 'database';
   import { Info, Settings, X } from 'lucide-svelte';
-  import PartySocket from 'partysocket';
-  import { createPartyClient } from 'partyrpc/src/client';
-  import type { SafePartyEvents, SafePartyResponses } from 'mclient';
-  import { onDestroy, tick } from 'svelte';
+  import { tick } from 'svelte';
   import type { ActionData, PageData } from './$types';
   import clsx from 'clsx';
+  import { createMessagesStore } from '$lib/stores/messages';
 
   export let data: PageData;
   export let form: ActionData;
-
-  const memberCountLabel = data.topic.members.length === 1 ? 'member' : 'members';
-
-  $: memberMap = new Map(data.topic.members.map((member) => [member.id, member]));
-
-  type OptimisticMessage = {
-    content: string;
-    authorId: string;
-  };
-
-  let activeUserIds = new Set<string>();
-  $: activeMembers = data.topic.members.filter((member) => activeUserIds.has(member.id));
-
-  let inputHeight = 0;
-  $: chatStyles = `min-height: calc(100vh - ${inputHeight}px - 9.5rem);`;
-
-  $: userClass = (authorId: string) =>
-    authorId === data.user.id ? 'text-info' : 'text-primary-content';
-
-  let messages: (Schema.Message | OptimisticMessage)[] = [];
-  const socket = new PartySocket(data.partyOptions);
-  const client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
 
   function scrollToEndOfMessages(smooth = true) {
     // get the last child element of #messages and then scroll to it
@@ -48,48 +23,37 @@
     }
   }
 
-  onDestroy(() => {
-    socket.close();
-  });
-
-  client.on('Init', (e) => {
-    messages = e.messages;
-    activeUserIds = new Set(e.userIds);
-    tick().then(() => {
-      scrollToEndOfMessages(false);
-    });
-  });
-
-  client.on('SetMessages', (e) => {
-    const newMessages = e.messages;
-    const empty = messages.length === 0;
-    messages = newMessages;
-
-    if (empty && messages.length !== 0) {
-      tick().then(() => {
-        scrollToEndOfMessages(false);
-      });
-    } else if (
-      // if window is scrolled to the bottom, scroll to the bottom again when a new message arrives
-      window.scrollY >= window.outerHeight
-    ) {
-      tick().then(() => {
-        scrollToEndOfMessages();
-      });
+  $: messagesStore = createMessagesStore({
+    partyOptions: data.partyOptions,
+    callbacks: {
+      Init: () => {
+        tick().then(() => {
+          scrollToEndOfMessages(false);
+        });
+      },
+      SetMessages: () => {
+        tick().then(() => {
+          const scrolled = () => window.scrollY >= window.outerHeight;
+          if (
+            // if window is scrolled to the bottom, scroll to the bottom again when a new message arrives
+            scrolled()
+          ) {
+            scrollToEndOfMessages();
+          }
+        });
+      }
     }
   });
 
-  client.on('UserJoined', async (e) => {
-    console.log(e.userId, 'joined');
-    activeUserIds.add(e.userId);
-    activeUserIds = new Set(activeUserIds);
-  });
+  $: ({ messages, activeUserIds } = $messagesStore);
 
-  client.on('UserLeft', async (e) => {
-    console.log(e.userId, 'left');
-    activeUserIds.delete(e.userId);
-    activeUserIds = new Set(activeUserIds);
-  });
+  $: memberCountLabel = data.topic.members.length === 1 ? 'member' : 'members';
+  $: memberMap = new Map(data.topic.members.map((member) => [member.id, member]));
+  $: activeMembers = data.topic.members.filter((member) => activeUserIds.has(member.id));
+  let inputHeight = 0;
+  $: chatStyles = `min-height: calc(100vh - ${inputHeight}px - 9.5rem);`;
+  $: userClass = (authorId: string) =>
+    authorId === data.user.id ? 'text-info' : 'text-primary-content';
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
     const formData = new FormData(event.currentTarget);
@@ -101,7 +65,7 @@
 
     messages = [...messages, optimisticMessage];
 
-    client.send({ type: 'addMessage', ...optimisticMessage });
+    messagesStore.addMessage(optimisticMessage);
 
     event.currentTarget.reset();
 
@@ -113,7 +77,7 @@
 
 <Container
   notProse={true}
-  className="flex flex-col justify-center items-center sm:mx-0 w-full h-full pl-0 pt-0"
+  className="flex flex-col justify-center items-center sm:mx-0 w-full h-full pl-0 pt-0 pr-0"
 >
   <ul
     class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl sticky top-2 p-2 z-20 mt-0"
