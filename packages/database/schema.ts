@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   uniqueIndex,
@@ -7,25 +7,35 @@ import {
   index,
   bigint,
   boolean,
-  serial
-} from 'drizzle-orm/pg-core';
+  serial,
+  integer,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 
 export const topic = pgTable(
-  'Topic',
+  "Topic",
   {
-    id: serial('id').primaryKey().notNull(),
-    name: text('name').notNull(),
-    description: text('description'),
-    context: text('context'),
-    projectId: serial('project_id')
+    id: serial("id").primaryKey().notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    context: text("context"),
+    projectId: serial("project_id")
       .notNull()
-      .references(() => project.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { precision: 3, mode: 'string' }).notNull()
+      .references(() => project.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('Topic_id_key').on(table.id)
+      idKey: uniqueIndex("Topic_id_key").on(table.id),
     };
   }
 );
@@ -33,59 +43,59 @@ export type Topic = typeof topic.$inferSelect;
 
 export const topicRelations = relations(topic, ({ many }) => ({
   usersInTopics: many(usersInTopics),
-  messages: many(message)
+  messages: many(message),
 }));
 
 export const session = pgTable(
-  'Session',
+  "Session",
   {
-    id: text('id').primaryKey().notNull(),
-    userId: text('user_id')
+    id: text("id").primaryKey().notNull(),
+    userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    activeExpires: bigint('active_expires', { mode: 'number' }).notNull(),
+    activeExpires: bigint("active_expires", { mode: "number" }).notNull(),
     // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    idleExpires: bigint('idle_expires', { mode: 'number' }).notNull()
+    idleExpires: bigint("idle_expires", { mode: "number" }).notNull(),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('Session_id_key').on(table.id),
-      userIdIdx: index('Session_user_id_idx').on(table.userId)
+      idKey: uniqueIndex("Session_id_key").on(table.id),
+      userIdIdx: index("Session_user_id_idx").on(table.userId),
     };
   }
 );
 export type Session = typeof session.$inferSelect;
 
 export const key = pgTable(
-  'Key',
+  "Key",
   {
-    id: text('id').primaryKey().notNull(),
-    hashedPassword: text('hashed_password'),
-    userId: text('user_id')
+    id: text("id").primaryKey().notNull(),
+    hashedPassword: text("hashed_password"),
+    userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' })
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('Key_id_key').on(table.id),
-      userIdIdx: index('Key_user_id_idx').on(table.userId)
+      idKey: uniqueIndex("Key_id_key").on(table.id),
+      userIdIdx: index("Key_user_id_idx").on(table.userId),
     };
   }
 );
 export type Key = typeof key.$inferSelect;
 
 export const user = pgTable(
-  'User',
+  "User",
   {
-    id: text('id').primaryKey().notNull(),
-    email: text('email'),
-    username: text('username').notNull(),
-    avatar: text('avatar')
+    id: text("id").primaryKey().notNull(),
+    email: text("email"),
+    username: text("username").notNull(),
+    avatar: text("avatar"),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('User_id_key').on(table.id)
+      idKey: uniqueIndex("User_id_key").on(table.id),
     };
   }
 );
@@ -93,22 +103,34 @@ export type User = typeof user.$inferSelect;
 
 export const userRelations = relations(user, ({ many }) => ({
   usersInProjects: many(usersInProjects),
-  usersInTopics: many(usersInTopics)
+  usersInTopics: many(usersInTopics),
 }));
 
+export const modelEnum = pgEnum("model", [
+  "gpt-4",
+  "gpt-3.5-turbo",
+  "gpt-3.5-turbo-16k",
+]);
+
 export const project = pgTable(
-  'Project',
+  "Project",
   {
-    id: serial('id').primaryKey().notNull(),
-    name: text('name').notNull(),
-    description: text('description'),
-    context: text('context'),
-    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { precision: 3, mode: 'string' }).notNull()
+    id: serial("id").primaryKey().notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    context: text("context"),
+    model: modelEnum("model").default("gpt-4").notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('Project_id_key').on(table.id)
+      idKey: uniqueIndex("Project_id_key").on(table.id),
     };
   }
 );
@@ -116,53 +138,69 @@ export type Project = typeof project.$inferSelect;
 
 export const projectRelations = relations(project, ({ many }) => ({
   usersInProjects: many(usersInProjects),
-  topics: many(topic)
+  topics: many(topic),
 }));
 
 export const usersInProjects = pgTable(
-  'UsersInProjects',
+  "UsersInProjects",
   {
-    id: serial('id').primaryKey().notNull(),
-    userId: text('user_id')
+    id: serial("id").primaryKey().notNull(),
+    userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    projectId: serial('project_id')
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    projectId: serial("project_id")
       .notNull()
-      .references(() => project.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { precision: 3, mode: 'string' }).notNull(),
-    admin: boolean('admin').default(false).notNull()
+      .references(() => project.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+    admin: boolean("admin").default(false).notNull(),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('UsersInProjects_id_key').on(table.id)
+      idKey: uniqueIndex("UsersInProjects_id_key").on(table.id),
     };
   }
 );
 export type UsersInProjects = typeof usersInProjects.$inferSelect;
 
-export const usersInProjectsRelations = relations(usersInProjects, ({ one }) => ({
-  user: one(user),
-  project: one(project)
-}));
+export const usersInProjectsRelations = relations(
+  usersInProjects,
+  ({ one }) => ({
+    user: one(user),
+    project: one(project),
+  })
+);
 
 export const usersInTopics = pgTable(
-  'UsersInTopics',
+  "UsersInTopics",
   {
-    id: serial('id').primaryKey().notNull(),
-    userId: text('user_id')
+    id: serial("id").primaryKey().notNull(),
+    userId: text("user_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    topicId: serial('topic_id')
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    topicId: serial("topic_id")
       .notNull()
-      .references(() => topic.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { precision: 3, mode: 'string' }).notNull(),
-    admin: boolean('admin').default(false).notNull()
+      .references(() => topic.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+    admin: boolean("admin").default(false).notNull(),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('UsersInTopics_id_key').on(table.id)
+      idKey: uniqueIndex("UsersInTopics_id_key").on(table.id),
     };
   }
 );
@@ -170,26 +208,31 @@ export type UsersInTopics = typeof usersInTopics.$inferSelect;
 
 export const usersInTopicsRelations = relations(usersInTopics, ({ one }) => ({
   user: one(user),
-  topic: one(topic)
+  topic: one(topic),
 }));
 
 export const message = pgTable(
-  'Message',
+  "Message",
   {
-    id: serial('id').primaryKey().notNull(),
-    content: text('content').notNull(),
-    authorId: text('author_id')
+    id: serial("id").primaryKey().notNull(),
+    content: text("content").notNull(),
+    authorId: text("author_id")
       .notNull()
-      .references(() => user.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    topicId: serial('topic_id')
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    topicId: serial("topic_id")
       .notNull()
-      .references(() => topic.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    createdAt: timestamp('createdAt', { precision: 3, mode: 'string' }).defaultNow().notNull(),
-    updatedAt: timestamp('updatedAt', { precision: 3, mode: 'string' }).notNull()
+      .references(() => topic.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
   },
   (table) => {
     return {
-      idKey: uniqueIndex('Message_id_key').on(table.id)
+      idKey: uniqueIndex("Message_id_key").on(table.id),
     };
   }
 );
@@ -198,10 +241,81 @@ export type Message = typeof message.$inferSelect;
 export const messageRelations = relations(message, ({ one }) => ({
   topic: one(topic, {
     fields: [message.topicId],
-    references: [topic.id]
+    references: [topic.id],
   }),
   user: one(user, {
     fields: [message.authorId],
-    references: [user.id]
-  })
+    references: [user.id],
+  }),
 }));
+
+export const userOpenAiKey = pgTable(
+  "UserOpenAiKey",
+  {
+    id: serial("id").primaryKey().notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    key: text("key").notNull(),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+  },
+  (table) => {
+    return {
+      idKey: uniqueIndex("UserOpenAiKey_id_key").on(table.id),
+    };
+  }
+);
+export type UserOpenAiKey = typeof userOpenAiKey.$inferSelect;
+
+export const userOpenAiKeyRelations = relations(userOpenAiKey, ({ one }) => ({
+  user: one(user),
+}));
+
+export const donatedKeyInProjects = pgTable(
+  "DonatedKeyInProjects",
+  {
+    id: serial("id").primaryKey().notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    projectId: integer("project_id")
+      .notNull()
+      .references(() => project.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userOpenAiKeyId: integer("user_open_ai_key_id")
+      .notNull()
+      .references(() => userOpenAiKey.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updatedAt", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+  },
+  (table) => {
+    return {
+      idKey: uniqueIndex("DonatedKeysInProjects_id_key").on(table.id),
+    };
+  }
+);
+
+export const donatedKeysInProjectsRelations = relations(
+  donatedKeyInProjects,
+  ({ one }) => ({
+    user: one(user),
+    project: one(project),
+    userOpenAiKey: one(userOpenAiKey),
+  })
+);

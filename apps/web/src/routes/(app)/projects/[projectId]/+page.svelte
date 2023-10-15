@@ -5,6 +5,8 @@
 
   export let data;
   export let form;
+
+  $: ({ hasDonatedProjectKey } = data);
 </script>
 
 <Container>
@@ -32,9 +34,7 @@
   >
     <fieldset class="flex flex-col w-full gap-2">
       <div class="form-control w-full max-w-xs">
-        <label class="label" for="name">
-          <span class="label-text">Name</span>
-        </label>
+        <label class="label" for="name">Name</label>
         <input
           id="name"
           name="name"
@@ -46,9 +46,7 @@
         />
       </div>
       <div class="form-control">
-        <label class="label" for="description">
-          <span class="label-text">Description</span>
-        </label>
+        <label class="label" for="description">Description</label>
         <textarea
           id="description"
           name="description"
@@ -62,10 +60,35 @@
           >
         </label>
       </div>
+      {#if hasDonatedProjectKey === 'own_key'}
+        <div class="form-control">
+          <label class="label" for="remove">You have donated your key to this project</label>
+          <label class="label cursor-pointer">
+            <span class="label-text">Remove my openai key from this project</span>
+            <input type="checkbox" class="checkbox" name="remove" id="remove" />
+          </label>
+        </div>
+      {:else if hasDonatedProjectKey === 'donated_key'}
+        <div class="form-control">
+          <label class="label" for="donate"
+            >Someone else has donated their key to this project</label
+          >
+          <label class="label cursor-pointer">
+            <span class="label-text">Replace this project's openai key with my own key</span>
+            <input type="checkbox" class="checkbox" name="donate" id="donate" />
+          </label>
+        </div>
+      {:else}
+        <div class="form-control">
+          <label class="label" for="donate">Donate your openai key to this project</label>
+          <label class="label cursor-pointer">
+            <span class="label-text">Donate my openai key to this project</span>
+            <input type="checkbox" class="checkbox" name="donate" id="donate" />
+          </label>
+        </div>
+      {/if}
       <div class="form-control">
-        <label class="label" for="context">
-          <span class="label-text">Context</span>
-        </label>
+        <label class="label" for="context">Context</label>
         <textarea
           id="context"
           name="context"
@@ -104,7 +127,7 @@
 <!-- @TODO refactor this into component -->
 {#if form}
   <div class="toast toast-end">
-    {#if form.updateProject.success}
+    {#if form?.updateProject?.success === true}
       <div class="alert alert-success">
         <button
           on:click={() => {
@@ -126,7 +149,7 @@
         >
           <X size={16} />
         </button>
-        <span>Could not update project.</span>
+        <span>{Object.values(form.updateProject.errors)?.[0]}</span>
       </div>
     {/if}
   </div>

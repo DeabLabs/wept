@@ -12,8 +12,14 @@ export const load = async ({ locals, params }) => {
     throw redirect(302, '/dashboard');
   }
 
+  const hasDonatedProjectKey = await queries.Project.hasDonatedProjectKey(
+    projectId,
+    session.user.userId
+  );
+
   return {
-    project
+    project,
+    hasDonatedProjectKey
   };
 };
 
@@ -28,6 +34,8 @@ export const actions = {
     const name = form.get('name')?.toString();
     const context = form.get('context')?.toString();
     const description = form.get('description')?.toString();
+    const donateKey = form.get('donate')?.toString();
+    const removeKey = form.get('remove')?.toString();
 
     if (!name) {
       return fail(400, {
@@ -40,7 +48,51 @@ export const actions = {
       });
     }
 
-    await queries.Project.updateProject(projectId, userId, { name, context, description });
+    // replace this project's key with the user's latest key
+    if (donateKey) {
+      const result = await queries.Project.donateKey(projectId, userId);
+
+      if (!result) {
+        return fail(400, {
+          updateProject: {
+            success: false,
+            errors: {
+              donate: 'Failed to donate key, did you configure a key in your profile?'
+            }
+          }
+        });
+      }
+    } else if (removeKey) {
+      const result = await queries.Project.revokeKey(projectId, userId);
+
+      if (!result) {
+        return fail(400, {
+          updateProject: {
+            success: false,
+            errors: {
+              remove: 'Failed to revoke key.'
+            }
+          }
+        });
+      }
+    }
+
+    const result = await queries.Project.updateProject(projectId, userId, {
+      name,
+      context,
+      description
+    });
+
+    if (!result) {
+      return fail(400, {
+        updateProject: {
+          success: false,
+          errors: {
+            general: 'Failed to update project.'
+          }
+        }
+      });
+    }
 
     return { updateProject: { success: true } };
   },

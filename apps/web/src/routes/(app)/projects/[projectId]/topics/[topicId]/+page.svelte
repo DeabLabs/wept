@@ -33,9 +33,7 @@
   >
     <fieldset class="flex flex-col w-full gap-2">
       <div class="form-control w-full max-w-xs">
-        <label class="label" for="name">
-          <span class="label-text">Name</span>
-        </label>
+        <label class="label" for="name">Name</label>
         <input
           id="name"
           name="name"
@@ -47,9 +45,7 @@
         />
       </div>
       <div class="form-control">
-        <label class="label" for="description">
-          <span class="label-text">Description</span>
-        </label>
+        <label class="label" for="description">Description</label>
         <textarea
           id="description"
           name="description"
@@ -64,9 +60,7 @@
         </label>
       </div>
       <div class="form-control">
-        <label class="label" for="context">
-          <span class="label-text">Context</span>
-        </label>
+        <label class="label" for="context">Context</label>
         <textarea
           id="context"
           name="context"
