@@ -139,7 +139,7 @@
         </button>
         <span>"{data.project.name}" updated successfully.</span>
       </div>
-    {:else if !form.updateProject.success}
+    {:else if !form.updateProject.success && 'errors' in form.updateProject}
       <div class="alert alert-error">
         <button
           on:click={() => {
