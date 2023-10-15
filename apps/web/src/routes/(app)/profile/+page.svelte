@@ -49,6 +49,9 @@
             GPT for anyone, in any topic, in the project.</span
           >
         </label>
+        <label class="label-alt" for="openai">
+          <span class="label-text">WARNING: This is not yet encrypted in DB</span>
+        </label>
       </div>
       <button class="btn btn-primary mb-4 sm:mb-0 sm:mt-24 flex self-end">Save</button>
     </fieldset>
