@@ -20,12 +20,14 @@ type InitResponse = {
 type SetMessagesResponse = { type: "SetMessages"; messages: Schema.Message[] };
 type UserJoinedResponse = { type: "UserJoined"; userId: string };
 type UserLeftResponse = { type: "UserLeft"; userId: string };
+type MessageEditedResponse = { type: "MessageEdited"; message: Schema.Message };
 
 type PartyResponses =
   | InitResponse
   | SetMessagesResponse
   | UserJoinedResponse
-  | UserLeftResponse;
+  | UserLeftResponse
+  | MessageEditedResponse;
 
 const party = createPartyRpc<PartyResponses, ClientContext>();
 
@@ -51,6 +53,68 @@ export const partyEvents = party.events({
       partyEvents.broadcast(room, {
         type: "SetMessages",
         messages: ctx.messages || [],
+      });
+    },
+  },
+  provideMessage: {
+    schema: v.object({
+      id: v.number(),
+    }),
+    async onMessage(message, _, room, ctx) {
+      const providedMessage = await ctx.Queries.Topic.UNSAFE_getMessageInTopic(
+        ctx.topicId,
+        message.id
+      );
+
+      if (!providedMessage) {
+        console.log("did not provide message");
+        return;
+      }
+
+      // insert the message into the messages array, in order based on createdAt date
+      const messages = ctx.messages || [];
+      const index = messages.findIndex(
+        (m) => m.createdAt > providedMessage.createdAt
+      );
+      if (index === -1) {
+        messages.push(providedMessage);
+      } else {
+        messages.splice(index, 0, providedMessage);
+      }
+
+      ctx.messages = messages;
+
+      partyEvents.broadcast(room, {
+        type: "SetMessages",
+        messages: ctx.messages || [],
+      });
+    },
+  },
+  editMessage: {
+    schema: v.object({
+      authorId: v.optional(v.string()),
+      messageId: v.number(),
+      content: v.string(),
+    }),
+    async onMessage(message, _, room, ctx) {
+      const updatedMessage = await ctx.Queries.Topic.UNSAFE_editMessageInTopic(
+        ctx.topicId,
+        message.messageId,
+        message.content
+      );
+
+      if (!updatedMessage) {
+        console.log("did not edit message");
+        return;
+      }
+
+      ctx.messages = ctx.messages?.map((m) =>
+        m.id === message.messageId ? updatedMessage : m
+      );
+
+      partyEvents.broadcast(room, {
+        type: "MessageEdited",
+        message: updatedMessage,
       });
     },
   },

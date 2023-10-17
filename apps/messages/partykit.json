@@ -1,5 +1,8 @@
 {
   "name": "messages",
   "main": "./src/server.ts",
+  "parties": {
+    "agent": "src/agent.ts"
+  },
   "compatibilityDate": "2023-10-09"
 }

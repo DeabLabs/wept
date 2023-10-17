@@ -8,6 +8,7 @@
   import type { ActionData, PageData } from './$types';
   import clsx from 'clsx';
   import { createMessagesStore } from '$lib/stores/messages';
+  import Message from '$lib/components/message.svelte';
 
   export let data: PageData;
   export let form: ActionData;
@@ -41,6 +42,17 @@
             scrollToEndOfMessages();
           }
         });
+      },
+      MessageEdited: () => {
+        tick().then(() => {
+          const scrolled = () => window.scrollY >= window.outerHeight;
+          if (
+            // if window is scrolled to the bottom, scroll to the bottom again when a new message arrives
+            scrolled()
+          ) {
+            scrollToEndOfMessages();
+          }
+        });
       }
     }
   });
@@ -49,6 +61,7 @@
 
   $: memberCountLabel = data.topic.members.length === 1 ? 'member' : 'members';
   $: memberMap = new Map(data.topic.members.map((member) => [member.id, member]));
+  $: memberMap.set('null', { admin: false, avatar: null, id: 'AGENT', username: 'GPT' });
   $: activeMembers = data.topic.members.filter((member) => activeUserIds.has(member.id));
   let inputHeight = 0;
   $: chatStyles = `min-height: calc(100vh - ${inputHeight}px - 9.5rem);`;
@@ -124,8 +137,8 @@
           <Avatar
             className="self-start"
             size="sm"
-            tooltip={memberMap.get(message.authorId)?.username}
-            avatar={memberMap.get(message.authorId)?.avatar}
+            tooltip={memberMap.get(`${message.authorId}`)?.username}
+            avatar={memberMap.get(`${message.authorId}`)?.avatar}
           />
         {:else}
           <!-- Add some space so that message still lines up with messages that have avatars -->
@@ -134,9 +147,9 @@
         {/if}
         <div class="w-full flex flex-col gap-2">
           {#if messages[i - 1]?.authorId !== message.authorId}
-            <div class="w-full flex justify-between items-center">
-              <span class={clsx('leading-none font-semibold', userClass(message.authorId))}
-                >{memberMap.get(message.authorId)?.username}</span
+            <div class="w-full flex justify-between items-center h-6 flex-nowrap">
+              <span class={clsx('leading-none font-semibold', userClass(`${message.authorId}`))}
+                >{memberMap.get(`${message.authorId}`)?.username}</span
               >
               <span class="text-xs text-neutral-content italic font-light"
                 >{new Date(
@@ -145,12 +158,7 @@
               >
             </div>
           {/if}
-          <p
-            class="leading-relaxed text-base-content break-words hyphens-auto max-w-full"
-            style="word-wrap: anywhere;"
-          >
-            {message.content}
-          </p>
+          <Message content={message.content} />
         </div>
       </li>
     {/each}

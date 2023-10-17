@@ -12,6 +12,20 @@ type Topic = typeof topic.$inferSelect;
 export class TopicQueries {
   constructor(private db: DbType | SDbType) {}
 
+  UNSAFE_getTopic = async (topicId: number) => {
+    const result = await this.db
+      .select()
+      .from(topic)
+      .where(eq(topic.id, topicId))
+      .limit(1);
+
+    if (!result.length) {
+      return null;
+    }
+
+    return result[0];
+  };
+
   getAuthorizedTopic = async (topicId: number, userId: string) => {
     // user must be an admin of the topic to get the authorized topic
     const result = await this.db
@@ -178,7 +192,6 @@ export class TopicQueries {
     content: string
   ) => {
     // a user can add a message to a topic if they are a member of the topic
-
     const result = await this.db
       .select()
       .from(usersInTopics)
@@ -291,5 +304,70 @@ export class TopicQueries {
     }
 
     return result;
+  };
+
+  addAIMessageToTopic = async (topicId: number, content: string) => {
+    // this does not check that the user is a member of the topic
+    // this should just be used by the messages server
+    const newMessage = await this.db
+      .insert(message)
+      .values({
+        topicId,
+        content,
+        aiGenerated: true,
+        updatedAt: new Date().toISOString(),
+      })
+      .returning();
+
+    if (!newMessage.length) {
+      return null;
+    }
+
+    return newMessage[0];
+  };
+
+  UNSAFE_editMessageInTopic = async (
+    topicId: number,
+    messageId: number,
+    content: string
+  ) => {
+    const result = await this.db
+      .update(message)
+      .set({ content })
+      .where(and(eq(message.id, messageId), eq(message.topicId, topicId)))
+      .returning();
+
+    if (!result.length) {
+      return null;
+    }
+
+    return result[0];
+  };
+
+  UNSAFE_getMessageInTopic = async (topicId: number, messageId: number) => {
+    const result = await this.db
+      .select()
+      .from(message)
+      .where(and(eq(message.id, messageId), eq(message.topicId, topicId)))
+      .limit(1);
+
+    if (!result.length) {
+      return null;
+    }
+
+    return result[0];
+  };
+
+  UNSAFE_deleteMessageInTopic = async (topicId: number, messageId: number) => {
+    const result = await this.db
+      .delete(message)
+      .where(and(eq(message.id, messageId), eq(message.topicId, topicId)))
+      .returning();
+
+    if (!result.length) {
+      return null;
+    }
+
+    return result[0];
   };
 }

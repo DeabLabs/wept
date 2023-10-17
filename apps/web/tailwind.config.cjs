@@ -6,7 +6,22 @@ const config = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
 
   theme: {
-    extend: {}
+    extend: {
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: 'none',
+            p: {
+              marginTop: 0,
+              marginBottom: 0
+            },
+            code: {
+              backgroundColor: 'var(--tw-prose-pre-bg)'
+            }
+          }
+        }
+      }
+    }
   },
 
   plugins: [t, d]
