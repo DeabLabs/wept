@@ -10,6 +10,10 @@
   let open = false;
   let loading = false;
 
+  function updateLoading(loading: boolean) {
+    loading = loading;
+  }
+
   function close() {
     open = false;
   }
@@ -21,9 +25,9 @@
     {action}
     class="flex justify-between"
     use:enhance={() => {
-      loading = true;
+      updateLoading(true);
       return async ({ result, update }) => {
-        loading = false;
+        updateLoading(false);
         await update();
         await applyAction(result);
         close();

@@ -9,6 +9,7 @@
   import clsx from 'clsx';
   import { createMessagesStore } from '$lib/stores/messages';
   import Message from '$lib/components/message.svelte';
+  import TextAreaAutosize from '$lib/components/textAreaAutosize.svelte';
 
   export let data: PageData;
   export let form: ActionData;
@@ -70,9 +71,14 @@
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
     const formData = new FormData(event.currentTarget);
+    const content = formData.get('content')?.toString() ?? '';
+
+    if (!content.trim()) {
+      return;
+    }
 
     const optimisticMessage = {
-      content: formData.get('content')?.toString() ?? '',
+      content,
       authorId: data.partyOptions.id
     };
 
@@ -90,10 +96,10 @@
 
 <Container
   notProse={true}
-  className="flex flex-col justify-center items-center sm:mx-0 w-full h-full pl-0 pt-0 pr-0"
+  className="flex flex-col justify-center sm:mx-0 w-full h-full pl-0 pt-0 pr-0"
 >
   <ul
-    class="menu menu-horizontal rounded-box bg-base-200 justify-center items-center max-w-7xl sticky top-2 p-2 z-20 mt-0"
+    class="menu menu-horizontal rounded-box bg-base-200 self-center justify-center items-center max-w-7xl sticky top-2 p-2 z-20 mt-0"
   >
     <li class="h-full">
       <button
@@ -165,11 +171,28 @@
   </ul>
   <form
     on:submit|preventDefault={handleSubmit}
-    class="flex bg-base-300 sticky bottom-0 w-full join p-4 sm:rounded-none"
+    class="flex bg-base-300 sticky bottom-0 w-full join-horizontal p-4 sm:rounded-none"
     bind:clientHeight={inputHeight}
   >
-    <input type="text" name="content" class="join-item input input-bordered w-full" />
-    <button type="submit" class="join-item btn btn-primary rounded-lg">Send</button>
+    <TextAreaAutosize
+      keydown={(e) => {
+        if (!e.key || (!e.metaKey && !e.shiftKey)) {
+          return;
+        }
+
+        // call handleSubmit if enter + cmd or enter + shift is pressed
+        if (e.key === 'Enter' && (e.metaKey || e.shiftKey)) {
+          e.preventDefault();
+          document.getElementById('send-btn')?.click();
+        }
+      }}
+      name="content"
+      className="join-item"
+      class="input input-bordered w-full"
+    />
+    <button id="send-btn" type="submit" class="join-item btn btn-ghost rounded-lg self-center"
+      >Send</button
+    >
   </form>
 </Container>
 

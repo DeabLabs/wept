@@ -61,7 +61,6 @@ export default class Agent implements Party.Server {
       if (result.success) {
         switch (result.output.action) {
           case 'connect': {
-            console.log(result.output);
             const socket = new PartySocket({
               host: this.party.env.PARTY_HOST as string,
               room: result.output.id,
