@@ -15,6 +15,20 @@ type Topic = typeof topic.$inferSelect;
 export class ProjectQueries {
   constructor(private db: DbType | SDbType) {}
 
+  UNSAFE_getProject = async (projectId: number) => {
+    const result = await this.db
+      .select()
+      .from(project)
+      .where(eq(project.id, projectId))
+      .limit(1);
+
+    if (!result.length) {
+      return null;
+    }
+
+    return result[0];
+  };
+
   getAuthorizedProject = async (projectId: number, userId: string) => {
     // user must be an admin of the project to get the authorized project
     const result = await this.db

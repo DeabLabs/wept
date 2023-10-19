@@ -216,9 +216,11 @@ export const message = pgTable(
   {
     id: serial("id").primaryKey().notNull(),
     content: text("content").notNull(),
-    authorId: text("author_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    authorId: text("author_id").references(() => user.id, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+    }),
+    aiGenerated: boolean("ai_generated").default(false).notNull(),
     topicId: serial("topic_id")
       .notNull()
       .references(() => topic.id, { onDelete: "cascade", onUpdate: "cascade" }),

@@ -59,6 +59,22 @@ export function createMessagesStore({ partyOptions, callbacks }: CreateMessagesS
       callbacks?.SetMessages?.();
     });
 
+    client.on('MessageEdited', (e) => {
+      update((state) => {
+        const newState = {
+          ...state,
+          messages: state.messages.map((message) => {
+            if ('id' in message && message.id === e.message.id) {
+              return e.message;
+            }
+            return message;
+          })
+        };
+        return newState;
+      });
+      callbacks?.MessageEdited?.();
+    });
+
     client.on('UserJoined', (e) => {
       update((state) => {
         const newState = {

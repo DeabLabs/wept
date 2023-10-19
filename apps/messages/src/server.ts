@@ -8,6 +8,7 @@ import type { ClientContext } from 'mclient';
 
 export default class Server implements Party.Server {
   context: ClientContext;
+  agent: Party.Stub | undefined;
 
   constructor(readonly party: Party.Party) {
     const [projectId, topicId] = party.id.split('/');
@@ -36,6 +37,44 @@ export default class Server implements Party.Server {
     };
   }
 
+  async ensureAgentConnected() {
+    if (this.context.users.size >= 1 && !this.agent) {
+      console.log('agent not connected, connecting');
+      this.agent = this.party.context.parties.agent.get(this.party.id);
+      const response = await this.agent.fetch({
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'connect',
+          id: this.party.id,
+          topicId: this.context.topicId,
+          projectId: this.context.projectId
+        })
+      });
+      const body = await response.json();
+      if (body?.success) {
+        console.log('agent connected');
+      } else {
+        console.log('agent failed to connect');
+        this.agent = undefined;
+      }
+    }
+  }
+
+  async disconnectAgent() {
+    if (this.agent) {
+      console.log('agent connected, disconnecting');
+      await this.agent.fetch({
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'disconnect',
+          id: this.party.id
+        })
+      });
+      this.agent = undefined;
+      console.log('agent disconnected');
+    }
+  }
+
   onClose(connection: Party.Connection<unknown>): void | Promise<void> {
     console.log('disconnecting user', connection.id);
     this.context.users.delete(connection.id);
@@ -44,16 +83,21 @@ export default class Server implements Party.Server {
     if (this.context.users.size === 0) {
       console.log('no users left, clearing messages');
       this.context.messages = undefined;
+      this.disconnectAgent();
     }
   }
 
   async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
     console.log('connecting user', conn.id);
-    this.context.users.add(conn.id);
-    const messages = await this.context.ensureLatestMessages();
+    if (conn.id !== 'AGENT') {
+      this.context.users.add(conn.id);
+      const messages = await this.context.ensureLatestMessages();
 
-    partyEvents.broadcast(this.party, { type: 'UserJoined', userId: conn.id });
-    partyEvents.send(conn, { type: 'Init', messages, userIds: Array.from(this.context.users) });
+      partyEvents.broadcast(this.party, { type: 'UserJoined', userId: conn.id });
+      partyEvents.send(conn, { type: 'Init', messages, userIds: Array.from(this.context.users) });
+
+      await this.ensureAgentConnected();
+    }
 
     conn.addEventListener('message', async (event) => {
       partyEvents.onMessage(event.data, conn, this.party, this.context);
