@@ -3,6 +3,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .wrap-anywhere {
+    overflow-wrap: anywhere;
+  }
+
+  .wrap-unset {
+    overflow-wrap: unset;
+  }
+}
+
 body {
   /* Disables pull-to-refresh and overscroll glow effect.
      Still keeps swipe navigations. */

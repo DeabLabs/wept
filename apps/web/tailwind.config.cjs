@@ -14,21 +14,21 @@ const config = {
             width: '100%',
             article: {
               maxWidth: '100%',
-              width: '100%'
+              width: '100%',
+              overflow: 'hidden'
             },
             p: {
               marginTop: 0,
               marginBottom: 0
             },
+            pre: {
+              overflow: 'auto',
+              'text-wrap': 'pretty',
+              // 'overflow-wrap': 'anywhere',
+              maxWidth: '90%'
+            },
             code: {
               backgroundColor: 'var(--tw-prose-pre-bg)'
-            },
-            pre: {
-              maxWidth: '100%',
-              width: '100%',
-
-              overflowX: 'auto',
-              'text-wrap': 'pretty'
             }
           }
         }
