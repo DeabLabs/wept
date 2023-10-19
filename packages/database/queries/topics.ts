@@ -122,14 +122,14 @@ export class TopicQueries {
         .from(usersInProjects)
         .where(eq(usersInProjects.projectId, projectId));
 
-      const txs = allUsersInProject.map((u) => {
+      const txs = allUsersInProject.map((u) =>
         tx.insert(usersInTopics).values({
           userId: u.userId,
           topicId: newTopic[0].id,
-          admin: false,
+          admin: userId === u.userId,
           updatedAt: new Date().toISOString(),
-        });
-      });
+        })
+      );
 
       await Promise.allSettled(txs);
 
