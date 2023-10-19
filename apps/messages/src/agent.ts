@@ -20,7 +20,9 @@ const connectionRequestBodySchema = valibot.object({
   /** The topic that the room represents */
   topicId: valibot.number(),
   /** The project that the room represents */
-  projectId: valibot.number()
+  projectId: valibot.number(),
+  /** temporary */
+  host: valibot.string()
 });
 
 const disconnectionRequestBodySchema = valibot.object({
@@ -54,33 +56,37 @@ export default class Agent implements Party.Server {
   }
 
   async onRequest(req: Party.Request) {
-    if (req.method === 'POST') {
-      const body = await req.json();
-      const result = valibot.safeParse(requests, body);
+    try {
+      if (req.method === 'POST') {
+        const body = await req.json();
+        const result = valibot.safeParse(requests, body);
 
-      if (result.success) {
-        switch (result.output.action) {
-          case 'connect': {
-            const socket = new PartySocket({
-              host: this.party.env.PARTY_HOST as string,
-              room: result.output.id,
-              id: this.id
-            });
-            this.topicId = result.output.topicId;
-            this.projectId = result.output.projectId;
-            this.client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
-            this.setup();
-            return new Response(JSON.stringify({ success: true }));
-          }
-          case 'disconnect': {
-            this.client?.unsubscribe();
-            this.client = undefined;
-            this.topicId = undefined;
-            this.projectId = undefined;
-            return new Response(JSON.stringify({ success: true }));
+        if (result.success) {
+          switch (result.output.action) {
+            case 'connect': {
+              const socket = new PartySocket({
+                host: result.output.host,
+                room: result.output.id,
+                id: this.id
+              });
+              this.topicId = result.output.topicId;
+              this.projectId = result.output.projectId;
+              this.client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
+              this.setup();
+              return new Response(JSON.stringify({ success: true }));
+            }
+            case 'disconnect': {
+              this.client?.unsubscribe();
+              this.client = undefined;
+              this.topicId = undefined;
+              this.projectId = undefined;
+              return new Response(JSON.stringify({ success: true }));
+            }
           }
         }
       }
+    } catch (e) {
+      console.error(e);
     }
 
     return new Response(JSON.stringify({ success: false }));

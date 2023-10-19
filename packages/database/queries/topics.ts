@@ -117,12 +117,21 @@ export class TopicQueries {
         return null;
       }
 
-      await tx.insert(usersInTopics).values({
-        userId,
-        topicId: newTopic[0].id,
-        admin: true,
-        updatedAt: new Date().toISOString(),
+      const allUsersInProject = await tx
+        .select()
+        .from(usersInProjects)
+        .where(eq(usersInProjects.projectId, projectId));
+
+      const txs = allUsersInProject.map((u) => {
+        tx.insert(usersInTopics).values({
+          userId: u.userId,
+          topicId: newTopic[0].id,
+          admin: false,
+          updatedAt: new Date().toISOString(),
+        });
       });
+
+      await Promise.allSettled(txs);
 
       return newTopic[0];
     });

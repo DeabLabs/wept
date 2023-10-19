@@ -31,6 +31,7 @@
           class="input input-bordered w-full max-w-sm"
           value={user.username}
         />
+        <label class="label-alt" for="username">Your id is: <code>{user.id}</code></label>
       </div>
       <div class="form-control w-full max-w-sm">
         <label class="label" for="openai">Openai Key</label>

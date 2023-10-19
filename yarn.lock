@@ -2955,12 +2955,10 @@ partykit@^0.0.32:
   optionalDependencies:
     fsevents "2.3.3"
 
-partysocket@0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/partysocket/-/partysocket-0.0.10.tgz#08de709b59f1310828ce90ad5ceabb47e94984c4"
-  integrity sha512-WpXKajj3Ak6C63qaDUu9QQrgNa7G8U0baOhZPFAo65Ywon+rS7A7iTKuf3oHtXN3tfEphlwDJtCx7fqfljlzxQ==
-  optionalDependencies:
-    react "^18.2.0"
+partysocket@0.0.12:
+  version "0.0.12"
+  resolved "https://registry.yarnpkg.com/partysocket/-/partysocket-0.0.12.tgz#97285d8047121fe82d8294f46dea037f579c5b22"
+  integrity sha512-20fikH08aHl7oJvRD7QLftzHvCEqxHf6y/ZiO0wltkl2cbNbtZQuDno9CLrqIQG2t22UWFHjiSqj/rT1In36Eg==
 
 path-exists@^4.0.0:
   version "4.0.0"

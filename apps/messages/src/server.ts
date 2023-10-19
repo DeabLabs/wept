@@ -47,7 +47,8 @@ export default class Server implements Party.Server {
           action: 'connect',
           id: this.party.id,
           topicId: this.context.topicId,
-          projectId: this.context.projectId
+          projectId: this.context.projectId,
+          host: this.party.env.PARTY_HOST
         })
       });
       const body = await response.json();
