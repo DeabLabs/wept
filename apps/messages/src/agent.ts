@@ -11,6 +11,7 @@ import { Pool } from '@neondatabase/serverless';
 import { getServerlessDb } from 'database/drizzle';
 import invariant from 'tiny-invariant';
 import type { ChatCompletionMessageParam } from 'openai/resources';
+import throttle from 'just-throttle';
 
 const connectionRequestBodySchema = valibot.object({
   /** The connect action */
@@ -190,18 +191,34 @@ export default class Agent implements Party.Server {
         stream: true
       });
 
+      const sendEdit = throttle(
+        (content: string) => {
+          this.client?.send({
+            type: 'editMessage',
+            messageId: newMessagePlaceholder.id,
+            content,
+            updatedAt: Dates.getCurrentDateInUTC()
+          });
+        },
+        128,
+        { trailing: true, leading: true }
+      );
+
       let text = '';
       for await (const part of stream) {
         const delta = part.choices?.[0]?.delta?.content;
-        if (delta) {
+        if (delta !== null && delta !== undefined) {
           text = `${text}${delta}`;
+          console.log(delta);
+          sendEdit(text);
+        } else {
+          // dump the final text when done
           this.client?.send({
             type: 'editMessage',
             messageId: newMessagePlaceholder.id,
             content: text,
             updatedAt: Dates.getCurrentDateInUTC()
           });
-        } else {
           this.responding = false;
         }
       }
