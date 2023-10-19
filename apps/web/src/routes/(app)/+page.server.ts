@@ -28,7 +28,20 @@ export const actions = {
       });
     }
 
-    await queries.Project.createProject(userId, name);
+    const project = await queries.Project.createProject(userId, name);
+
+    if (!project) {
+      return fail(400, {
+        createProject: {
+          success: false,
+          errors: {
+            general: 'Could not create project'
+          }
+        }
+      });
+    }
+
+    await queries.Project.donateKey(project.id, userId);
 
     return { createProject: { success: true } };
   },

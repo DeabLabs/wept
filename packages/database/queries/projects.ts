@@ -113,12 +113,20 @@ export class ProjectQueries {
         return null;
       }
 
-      await tx.insert(usersInProjects).values({
-        userId,
-        projectId: newProject[0].id,
-        admin: true,
-        updatedAt: getCurrentDateInUTC(),
-      });
+      const uip = await tx
+        .insert(usersInProjects)
+        .values({
+          userId,
+          projectId: newProject[0].id,
+          admin: true,
+          updatedAt: getCurrentDateInUTC(),
+        })
+        .returning();
+
+      if (uip.length === 0) {
+        tx.rollback();
+        return null;
+      }
 
       return newProject[0];
     });
