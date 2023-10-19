@@ -209,7 +209,6 @@ export default class Agent implements Party.Server {
         const delta = part.choices?.[0]?.delta?.content;
         if (delta !== null && delta !== undefined) {
           text = `${text}${delta}`;
-          console.log(delta);
           sendEdit(text);
         } else {
           // dump the final text when done
