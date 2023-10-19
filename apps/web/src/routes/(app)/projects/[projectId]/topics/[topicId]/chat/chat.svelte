@@ -9,8 +9,9 @@
   import clsx from 'clsx';
   import { createMessagesStore } from '$lib/stores/messages';
   import Message from '$lib/components/message.svelte';
-  import TextAreaAutosize from '$lib/components/textAreaAutosize.svelte';
   import throttle from 'just-throttle';
+  // @ts-expect-error
+  import autosize from 'svelte-autosize';
 
   export let data: PageData;
   export let form: ActionData;
@@ -71,6 +72,18 @@
   $: chatStyles = `min-height: calc(100vh - ${inputHeight}px - 9.5rem);`;
   $: userClass = (authorId: string) =>
     authorId === data.user.id ? 'text-info' : 'text-primary-content';
+
+  function textareaKeyDown(e: KeyboardEvent) {
+    if (!e.key || (!e.metaKey && !e.shiftKey)) {
+      return;
+    }
+
+    // call handleSubmit if enter + cmd or enter + shift is pressed
+    if (e.key === 'Enter' && (e.metaKey || e.shiftKey)) {
+      e.preventDefault();
+      document.getElementById('send-btn')?.click();
+    }
+  }
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
     const formData = new FormData(event.currentTarget);
@@ -177,21 +190,12 @@
     class="flex bg-base-300 sticky bottom-0 w-full join-horizontal p-4 sm:rounded-none"
     bind:clientHeight={inputHeight}
   >
-    <TextAreaAutosize
-      keydown={(e) => {
-        if (!e.key || (!e.metaKey && !e.shiftKey)) {
-          return;
-        }
-
-        // call handleSubmit if enter + cmd or enter + shift is pressed
-        if (e.key === 'Enter' && (e.metaKey || e.shiftKey)) {
-          e.preventDefault();
-          document.getElementById('send-btn')?.click();
-        }
-      }}
+    <textarea
+      on:keydown={textareaKeyDown}
+      use:autosize
       name="content"
-      className="join-item"
-      class="input input-bordered w-full"
+      style="overflow-x: hidden;"
+      class="input input-bordered w-full join-item max-h-36 !overflow-x-hidden resize-none"
     />
     <button id="send-btn" type="submit" class="join-item btn btn-ghost rounded-lg self-center"
       >Send</button
