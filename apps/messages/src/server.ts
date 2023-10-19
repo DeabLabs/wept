@@ -11,7 +11,7 @@ export default class Server implements Party.Server {
   agent: Party.Stub | undefined;
 
   constructor(readonly party: Party.Party) {
-    const [projectId, topicId] = party.id.split('/');
+    const [projectId, topicId] = party.id.split('-');
 
     const client = new Pool({
       connectionString: party.env.DATABASE_URL as string

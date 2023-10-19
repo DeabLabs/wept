@@ -19,7 +19,7 @@ export const load = async ({ locals, params }) => {
     topic,
     partyOptions: {
       host: PARTY_HOST,
-      room: `${params.projectId}/${params.topicId}`,
+      room: `${params.projectId}-${params.topicId}`,
       id: session.user.userId
     },
     settingsLink: `/projects/${params.projectId}/topics/${params.topicId}`
