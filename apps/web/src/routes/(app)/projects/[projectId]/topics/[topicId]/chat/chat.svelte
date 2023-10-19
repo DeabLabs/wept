@@ -22,12 +22,16 @@
     if (messagesEl instanceof HTMLElement) {
       const lastMessageEl = messagesEl.lastElementChild;
       if (lastMessageEl instanceof HTMLElement) {
-        lastMessageEl.scrollIntoView({ behavior: smooth ? 'smooth' : undefined });
+        // select the last message's element with the .prose class
+        const lastMessageContent = lastMessageEl.querySelector('.prose');
+        if (lastMessageContent instanceof HTMLElement) {
+          lastMessageContent.scrollIntoView({ behavior: smooth ? 'smooth' : undefined });
+        }
       }
     }
   }
 
-  const throttledScroll = throttle(scrollToEndOfMessages, 1000, { leading: true });
+  const throttledScroll = throttle(scrollToEndOfMessages, 256, { leading: true, trailing: true });
 
   $: messagesStore = createMessagesStore({
     partyOptions: data.partyOptions,
@@ -195,7 +199,7 @@
       use:autosize
       name="content"
       style="overflow-x: hidden;"
-      class="input input-bordered w-full join-item max-h-36 !overflow-x-hidden resize-none"
+      class="input input-bordered w-full join-item max-h-36 !overflow-x-hidden resize-none pt-3"
     />
     <button id="send-btn" type="submit" class="join-item btn btn-ghost rounded-lg self-center"
       >Send</button

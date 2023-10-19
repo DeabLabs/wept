@@ -6,6 +6,7 @@ import type { SafePartyEvents, SafePartyResponses } from 'mclient';
 import PartySocket from 'partysocket';
 import { createPartyClient } from 'partyrpc';
 import invariant from 'tiny-invariant';
+import throttle from 'just-throttle';
 
 type OptimisticMessage = {
   content: string;
@@ -59,20 +60,28 @@ export function createMessagesStore({ partyOptions, callbacks }: CreateMessagesS
       callbacks?.SetMessages?.();
     });
 
+    const updateMessages = throttle(
+      (newMessage: Schema.Message) => {
+        update((state) => {
+          const newState = {
+            ...state,
+            messages: state.messages.map((message) => {
+              if ('id' in message && message.id === newMessage.id) {
+                return newMessage;
+              }
+              return message;
+            })
+          };
+          return newState;
+        });
+        callbacks?.MessageEdited?.();
+      },
+      16,
+      { trailing: true, leading: true }
+    );
+
     client.on('MessageEdited', (e) => {
-      update((state) => {
-        const newState = {
-          ...state,
-          messages: state.messages.map((message) => {
-            if ('id' in message && message.id === e.message.id) {
-              return e.message;
-            }
-            return message;
-          })
-        };
-        return newState;
-      });
-      callbacks?.MessageEdited?.();
+      updateMessages(e.message);
     });
 
     client.on('UserJoined', (e) => {
