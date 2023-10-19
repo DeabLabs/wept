@@ -1,4 +1,4 @@
-import type { Schema } from "database";
+import { Dates, type Schema } from "database";
 import type { Queries as QueryClient, SDbType } from "database/queries";
 import { createPartyRpc } from "partyrpc/src/server";
 import * as v from "valibot";
@@ -95,12 +95,35 @@ export const partyEvents = party.events({
       authorId: v.optional(v.string()),
       messageId: v.number(),
       content: v.string(),
+      updatedAt: v.string("iso datetime required", [v.isoDateTime()]),
     }),
-    async onMessage(message, _, room, ctx) {
+    async onMessage(newMessage, _, room, ctx) {
+      const oldMessage = ctx.messages?.find(
+        (m) => m.id === newMessage.messageId
+      );
+
+      if (!oldMessage) {
+        console.log("cant edit missing message");
+        return;
+      }
+
+      // if the message.updatedAt is older than the message we have, don't edit it
+      if (
+        oldMessage.updatedAt &&
+        Dates.isBefore(newMessage.updatedAt, oldMessage.updatedAt)
+      ) {
+        console.log(
+          `${newMessage.updatedAt} is older than ${oldMessage.updatedAt}`
+        );
+        console.log("message is older than the one we have");
+        return;
+      }
+
       const updatedMessage = await ctx.Queries.Topic.UNSAFE_editMessageInTopic(
         ctx.topicId,
-        message.messageId,
-        message.content
+        newMessage.messageId,
+        newMessage.content,
+        newMessage.updatedAt
       );
 
       if (!updatedMessage) {
@@ -109,7 +132,7 @@ export const partyEvents = party.events({
       }
 
       ctx.messages = ctx.messages?.map((m) =>
-        m.id === message.messageId ? updatedMessage : m
+        m.id === newMessage.messageId ? updatedMessage : m
       );
 
       partyEvents.broadcast(room, {

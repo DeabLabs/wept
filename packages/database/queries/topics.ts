@@ -7,6 +7,7 @@ import {
   usersInTopics,
 } from "../schema";
 import type { DbType, SDbType } from ".";
+import { getCurrentDateInUTC } from "../dates";
 
 type Topic = typeof topic.$inferSelect;
 export class TopicQueries {
@@ -108,7 +109,7 @@ export class TopicQueries {
         .values({
           name,
           projectId,
-          updatedAt: new Date().toISOString(),
+          updatedAt: getCurrentDateInUTC(),
         })
         .returning();
 
@@ -127,7 +128,7 @@ export class TopicQueries {
           userId: u.userId,
           topicId: newTopic[0].id,
           admin: userId === u.userId,
-          updatedAt: new Date().toISOString(),
+          updatedAt: getCurrentDateInUTC(),
         })
       );
 
@@ -222,7 +223,7 @@ export class TopicQueries {
         topicId,
         authorId: userId,
         content,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       })
       .returning();
 
@@ -295,14 +296,14 @@ export class TopicQueries {
         userId: inviteeId,
         projectId: isAdmin[0].projectId,
         admin: false,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       });
 
       await tx.insert(usersInTopics).values({
         userId: inviteeId,
         topicId,
         admin: false,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       });
 
       return invitee[0];
@@ -324,7 +325,7 @@ export class TopicQueries {
         topicId,
         content,
         aiGenerated: true,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       })
       .returning();
 
@@ -335,14 +336,23 @@ export class TopicQueries {
     return newMessage[0];
   };
 
+  /**
+   *
+   * @param topicId
+   * @param messageId
+   * @param content
+   * @param updatedAt - iso string `getCurrentDateInUTC()`
+   * @returns
+   */
   UNSAFE_editMessageInTopic = async (
     topicId: number,
     messageId: number,
-    content: string
+    content: string,
+    updatedAt: string
   ) => {
     const result = await this.db
       .update(message)
-      .set({ content })
+      .set({ content, updatedAt })
       .where(and(eq(message.id, messageId), eq(message.topicId, topicId)))
       .returning();
 

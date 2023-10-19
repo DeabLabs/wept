@@ -11,6 +11,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "dayjs": "^1.11.10",
     "drizzle-orm": "^0.28.6"
   },
   "devDependencies": {

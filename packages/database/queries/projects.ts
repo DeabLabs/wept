@@ -8,6 +8,7 @@ import {
   usersInTopics,
 } from "../schema";
 import type { DbType, SDbType } from ".";
+import { getCurrentDateInUTC } from "../dates";
 
 type Project = typeof project.$inferSelect;
 type Topic = typeof topic.$inferSelect;
@@ -103,7 +104,7 @@ export class ProjectQueries {
         .insert(project)
         .values({
           name,
-          updatedAt: new Date().toISOString(),
+          updatedAt: getCurrentDateInUTC(),
         })
         .returning();
 
@@ -116,7 +117,7 @@ export class ProjectQueries {
         userId,
         projectId: newProject[0].id,
         admin: true,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       });
 
       return newProject[0];
@@ -173,7 +174,7 @@ export class ProjectQueries {
       .update(project)
       .set({
         ...args,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       })
       .where(and(eq(project.id, projectId)))
       .returning();
@@ -231,7 +232,7 @@ export class ProjectQueries {
         projectId: projectId,
         userId: userId,
         userOpenAiKeyId: keys[0].id,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       })
       .returning();
 

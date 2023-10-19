@@ -1,6 +1,7 @@
 import { desc, eq } from "drizzle-orm";
 import type { DbType, SDbType } from ".";
 import { user, userOpenAiKey } from "../schema";
+import { getCurrentDateInUTC } from "../dates";
 
 type User = typeof user.$inferSelect;
 
@@ -42,7 +43,7 @@ export class UserQueries {
       .values({
         userId,
         key: openAiKey,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       })
       .returning();
 
@@ -93,7 +94,7 @@ export class UserQueries {
       .update(userOpenAiKey)
       .set({
         key: openAiKey,
-        updatedAt: new Date().toISOString(),
+        updatedAt: getCurrentDateInUTC(),
       })
       .where(eq(userOpenAiKey.id, latest[0].id))
       .returning();

@@ -4,7 +4,7 @@ import { createPartyClient } from 'partyrpc';
 import * as valibot from 'valibot';
 import PartySocket from 'partysocket';
 import type { Schema } from 'database';
-import { Queries as QueryClient } from 'database';
+import { Queries as QueryClient, Dates } from 'database';
 import { OpenAI } from 'openai';
 import type { SDbType } from 'database/queries';
 import { Pool } from '@neondatabase/serverless';
@@ -198,7 +198,8 @@ export default class Agent implements Party.Server {
           this.client?.send({
             type: 'editMessage',
             messageId: newMessagePlaceholder.id,
-            content: text
+            content: text,
+            updatedAt: Dates.getCurrentDateInUTC()
           });
         } else {
           this.responding = false;

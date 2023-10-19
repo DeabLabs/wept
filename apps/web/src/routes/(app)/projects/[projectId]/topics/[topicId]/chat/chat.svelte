@@ -10,6 +10,7 @@
   import { createMessagesStore } from '$lib/stores/messages';
   import Message from '$lib/components/message.svelte';
   import TextAreaAutosize from '$lib/components/textAreaAutosize.svelte';
+  import throttle from 'just-throttle';
 
   export let data: PageData;
   export let form: ActionData;
@@ -25,12 +26,14 @@
     }
   }
 
+  const throttledScroll = throttle(scrollToEndOfMessages, 1000, { leading: true });
+
   $: messagesStore = createMessagesStore({
     partyOptions: data.partyOptions,
     callbacks: {
       Init: () => {
         tick().then(() => {
-          scrollToEndOfMessages(false);
+          throttledScroll(false);
         });
       },
       SetMessages: () => {
@@ -40,7 +43,7 @@
             // if window is scrolled to the bottom, scroll to the bottom again when a new message arrives
             scrolled()
           ) {
-            scrollToEndOfMessages();
+            throttledScroll();
           }
         });
       },
@@ -51,7 +54,7 @@
             // if window is scrolled to the bottom, scroll to the bottom again when a new message arrives
             scrolled()
           ) {
-            scrollToEndOfMessages();
+            throttledScroll();
           }
         });
       }
@@ -89,7 +92,7 @@
     event.currentTarget.reset();
 
     tick().then(() => {
-      scrollToEndOfMessages();
+      throttledScroll();
     });
   }
 </script>
