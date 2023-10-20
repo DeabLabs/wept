@@ -23,9 +23,12 @@
       const lastMessageEl = messagesEl.lastElementChild;
       if (lastMessageEl instanceof HTMLElement) {
         // select the last message's element with the .prose class
-        const lastMessageContent = lastMessageEl.querySelector('.prose');
+        const lastMessageContent = lastMessageEl.querySelector('.prose > article');
         if (lastMessageContent instanceof HTMLElement) {
-          lastMessageContent.scrollIntoView({ behavior: smooth ? 'smooth' : undefined });
+          // get the last, deepest nested child element of lastMessageContent and then scroll to it
+          lastMessageContent.lastElementChild?.scrollIntoView({
+            behavior: smooth ? 'smooth' : undefined
+          });
         }
       }
     }

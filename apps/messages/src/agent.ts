@@ -58,7 +58,6 @@ export default class Agent implements Party.Server {
 
   async onRequest(req: Party.Request) {
     try {
-      console.log(req.url);
       if (req.method === 'POST') {
         const body = await req.json();
         const result = valibot.safeParse(requests, body);
@@ -188,7 +187,15 @@ export default class Agent implements Party.Server {
       invariant(openai);
       const stream = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo-16k',
-        messages: [...systemMessages, ...messages],
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a chat LLM whose responses are parsed as markdown and rendered in a web UI.'
+          },
+          ...systemMessages,
+          ...messages
+        ],
         stream: true
       });
 
