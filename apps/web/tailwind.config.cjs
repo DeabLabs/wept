@@ -4,7 +4,39 @@ import t from '@tailwindcss/typography';
 /** @type {import('tailwindcss').Config}*/
 const config = {
   content: ['./src/**/*.{html,js,svelte,ts}'],
-
+  daisyui: {
+    themes: [
+      'light',
+      'dark',
+      'cupcake',
+      'bumblebee',
+      'emerald',
+      'corporate',
+      'synthwave',
+      'retro',
+      'cyberpunk',
+      'valentine',
+      'halloween',
+      'garden',
+      'forest',
+      'aqua',
+      'lofi',
+      'pastel',
+      'fantasy',
+      'wireframe',
+      'black',
+      'luxury',
+      'dracula',
+      'cmyk',
+      'autumn',
+      'business',
+      'acid',
+      'lemonade',
+      'night',
+      'coffee',
+      'winter'
+    ]
+  },
   theme: {
     extend: {
       typography: {
@@ -28,7 +60,8 @@ const config = {
               maxWidth: '90%'
             },
             code: {
-              backgroundColor: 'var(--tw-prose-pre-bg)'
+              backgroundColor: 'var(--tw-prose-pre-bg)',
+              color: 'var(--tw-prose-pre-code)'
             }
           }
         }

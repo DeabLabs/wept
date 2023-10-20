@@ -75,7 +75,7 @@
   let inputHeight = 0;
   $: chatStyles = `min-height: calc(100vh - ${inputHeight}px - 9.5rem);`;
   $: userClass = (authorId: string) =>
-    authorId === data.user.id ? 'text-info' : 'text-primary-content';
+    authorId === data.user.id ? 'text-info' : 'text-base-content';
 
   function textareaKeyDown(e: KeyboardEvent) {
     if (!e.key || (!e.metaKey && !e.shiftKey)) {
@@ -177,7 +177,7 @@
               <span class={clsx('leading-none font-semibold', userClass(`${message.authorId}`))}
                 >{memberMap.get(`${message.authorId}`)?.username}</span
               >
-              <span class="text-xs text-neutral-content italic font-light"
+              <span class="text-xs text-base-content italic font-light"
                 >{new Date(
                   'createdAt' in message ? message.createdAt : Date.now()
                 ).toLocaleString()}</span

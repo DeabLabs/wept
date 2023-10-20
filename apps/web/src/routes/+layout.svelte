@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import '../app.postcss';
 </script>
 

@@ -3,6 +3,13 @@
   import NavLinks from '$lib/components/navLinks.svelte';
   import Navbar from '$lib/components/navbar.svelte';
   import ProjectsMenu from '$lib/components/projectsMenu.svelte';
+  import ThemePicker from '$lib/components/themePicker.svelte';
+  import { onMount } from 'svelte';
+  import { themeChange } from 'theme-change';
+
+  onMount(() => {
+    themeChange(false);
+  });
 
   export let data;
 
@@ -16,6 +23,9 @@
   </svelte:fragment>
   <svelte:fragment slot="sidebar">
     <NavLinks />
+    <li class="flex-col flex">
+      <ThemePicker />
+    </li>
     <div class="divider" />
     <ProjectsMenu projects={data.projects} />
   </svelte:fragment>
