@@ -58,6 +58,7 @@ export default class Agent implements Party.Server {
 
   async onRequest(req: Party.Request) {
     try {
+      console.log(req.url);
       if (req.method === 'POST') {
         const body = await req.json();
         const result = valibot.safeParse(requests, body);
