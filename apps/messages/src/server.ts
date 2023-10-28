@@ -43,6 +43,9 @@ export default class Server implements Party.Server {
       this.agent = this.party.context.parties.agent.get(this.party.id);
       const response = await this.agent.fetch({
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.party.env.PARTY_SHARED_SECRET}`
+        },
         body: JSON.stringify({
           action: 'connect',
           id: this.party.id,

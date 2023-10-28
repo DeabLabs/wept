@@ -57,6 +57,19 @@ export default class Agent implements Party.Server {
   }
 
   async onRequest(req: Party.Request) {
+    // check bearer token in header === this.party.env.PARTY_SHARED_SECRET
+    // if not, return 401
+
+    const bearer = req.headers.get('Authorization');
+    if (!bearer) {
+      return new Response(JSON.stringify({ success: false }));
+    }
+
+    const token = bearer.split(' ')[1];
+    if (token !== this.party.env.PARTY_SHARED_SECRET) {
+      return new Response(JSON.stringify({ success: false }), { status: 401 });
+    }
+
     try {
       if (req.method === 'POST') {
         const body = await req.json();
@@ -68,7 +81,10 @@ export default class Agent implements Party.Server {
               const socket = new PartySocket({
                 host: result.output.host,
                 room: result.output.id,
-                id: this.id
+                id: this.id,
+                query: () => ({
+                  token: (this.party.env.PARTY_SHARED_SECRET as string) || ''
+                })
               });
               this.topicId = result.output.topicId;
               this.projectId = result.output.projectId;
