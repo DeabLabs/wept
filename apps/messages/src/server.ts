@@ -121,7 +121,8 @@ export default class Server implements Party.Server {
     }
 
     const { Queries } = Server.getNewDbClient(lobby.env.DATABASE_URL as string);
-    const valid = await Queries.TemporaryTokens.validateAndConsumeToken('agent', keyInUrl);
+    const agentKey = `agent-${lobby.id}`;
+    const valid = await Queries.TemporaryTokens.validateAndConsumeToken(agentKey, keyInUrl);
 
     if (valid) {
       console.log('AGENT VALID');
@@ -147,8 +148,9 @@ export default class Server implements Party.Server {
     if (this.context.users.size >= 1 && !this.agent) {
       console.log('agent not connected, connecting');
       this.agent = this.party.context.parties.agent.get(this.party.id);
+      const agentKey = `agent-${this.party.id}`;
       const result = await this.context.Queries.TemporaryTokens.createToken(
-        'agent',
+        agentKey,
         generateRandomString(16)
       );
       if (!result) {
