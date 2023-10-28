@@ -201,6 +201,7 @@
       on:keydown={textareaKeyDown}
       use:autosize
       name="content"
+      placeholder="Shift + Enter to send a message. Enter to add a new line."
       style="overflow-x: hidden;"
       class="input input-bordered w-full join-item max-h-36 !overflow-x-hidden resize-none pt-3"
     />
