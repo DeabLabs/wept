@@ -22,6 +22,8 @@ const connectionRequestBodySchema = valibot.object({
   topicId: valibot.number(),
   /** The project that the room represents */
   projectId: valibot.number(),
+  /** Temporary token that must be sent with first party connection */
+  token: valibot.string(),
   /** temporary */
   host: valibot.string()
 });
@@ -78,12 +80,13 @@ export default class Agent implements Party.Server {
         if (result.success) {
           switch (result.output.action) {
             case 'connect': {
+              const tempToken = result.output.token;
               const socket = new PartySocket({
                 host: result.output.host,
                 room: result.output.id,
                 id: this.id,
                 query: () => ({
-                  token: (this.party.env.PARTY_SHARED_SECRET as string) || ''
+                  token: tempToken
                 })
               });
               this.topicId = result.output.topicId;

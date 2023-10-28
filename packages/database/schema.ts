@@ -321,3 +321,21 @@ export const donatedKeysInProjectsRelations = relations(
     userOpenAiKey: one(userOpenAiKey),
   })
 );
+
+// a simple key value store for storing temporary tokens
+export const temporaryTokens = pgTable(
+  "TemporaryTokens",
+  {
+    id: text("id").primaryKey().notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", {
+      precision: 3,
+      mode: "string",
+    }).notNull(),
+  },
+  (table) => {
+    return {
+      idKey: uniqueIndex("TemporaryTokens_id_key").on(table.id),
+    };
+  }
+);
