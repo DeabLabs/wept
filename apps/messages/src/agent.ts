@@ -167,6 +167,10 @@ export default class Agent implements Party.Server {
     this.client.on('MessageEdited', (e) => {
       this.messages = this.messages.map((m) => (m.id === e.message.id ? e.message : m));
     });
+
+    this.client.on('MessageDeleted', (e) => {
+      this.messages = this.messages.filter((m) => m.id !== e.messageId);
+    });
   }
 
   async respond() {

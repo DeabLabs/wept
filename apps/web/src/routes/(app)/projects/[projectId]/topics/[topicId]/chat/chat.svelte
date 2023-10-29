@@ -3,7 +3,7 @@
   import Avatar from '$lib/components/avatar.svelte';
   import AvatarGroup from '$lib/components/avatarGroup.svelte';
   import Container from '$lib/components/container.svelte';
-  import { Info, Settings, X } from 'lucide-svelte';
+  import { Info, MoreHorizontalIcon, Settings, X } from 'lucide-svelte';
   import { tick } from 'svelte';
   import type { ActionData, PageData } from './$types';
   import clsx from 'clsx';
@@ -12,6 +12,7 @@
   import throttle from 'just-throttle';
   // @ts-expect-error
   import autosize from 'svelte-autosize';
+  import { user } from 'database/schema';
 
   export let data: PageData;
   export let form: ActionData;
@@ -94,7 +95,7 @@
     }
   }
 
-  async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
+  function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
     const formData = new FormData(event.currentTarget);
     const content = formData.get('content')?.toString() ?? '';
 
@@ -116,6 +117,14 @@
     tick().then(() => {
       throttledScroll();
     });
+  }
+
+  function handleDeleteMessage(messageId: number) {
+    try {
+      messagesStore.deleteMessage(messageId);
+    } catch {
+      console.error('Could not delete message with id', messageId);
+    }
   }
 </script>
 
@@ -163,7 +172,7 @@
     style={chatStyles}
   >
     {#each messages as message, i}
-      <li class="w-full flex gap-2">
+      <li class="w-full flex gap-2 group">
         {#if messages[i - 1]?.authorId !== message.authorId}
           <Avatar
             className="self-start"
@@ -189,7 +198,27 @@
               >
             </div>
           {/if}
-          <Message content={message.content} />
+          <div class="flex justify-between items-start">
+            <Message content={message.content} />
+            <div class="dropdown">
+              <button
+                tabindex="0"
+                class={clsx(
+                  'btn btn-sm btn-ghost hidden',
+                  message.authorId === data.user.id && 'focus-visible:block group-hover:block'
+                )}><MoreHorizontalIcon /></button
+              >
+              <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                {#if message.authorId === data.user.id && 'id' in message}
+                  <li>
+                    <button on:click={() => 'id' in message && handleDeleteMessage(message.id)}
+                      >Delete</button
+                    >
+                  </li>
+                {/if}
+              </ul>
+            </div>
+          </div>
         </div>
       </li>
     {/each}

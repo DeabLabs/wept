@@ -389,4 +389,54 @@ export class TopicQueries {
 
     return result[0];
   };
+
+  deleteMessageInTopic = async (
+    topicId: number,
+    userId: string,
+    messageId: number
+  ) => {
+    // anyone can delete their own message
+    // only admins can delete other messages
+    const isAdminResult = await this.db
+      .select({ admin: usersInTopics.admin })
+      .from(usersInTopics)
+      .where(
+        and(
+          eq(usersInTopics.topicId, topicId),
+          eq(usersInTopics.userId, userId)
+        )
+      );
+
+    const isAdmin = isAdminResult.length && isAdminResult[0].admin;
+
+    if (!isAdmin) {
+      const result = await this.db
+        .delete(message)
+        .where(
+          and(
+            eq(message.id, messageId),
+            eq(message.topicId, topicId),
+            eq(message.authorId, userId)
+          )
+        )
+        .returning();
+
+      if (!result.length) {
+        return null;
+      }
+
+      return result[0];
+    } else {
+      const result = await this.db
+        .delete(message)
+        .where(and(eq(message.id, messageId), eq(message.topicId, topicId)))
+        .returning();
+
+      if (!result.length) {
+        return null;
+      }
+
+      return result[0];
+    }
+  };
 }

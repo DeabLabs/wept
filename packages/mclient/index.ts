@@ -21,13 +21,15 @@ type SetMessagesResponse = { type: "SetMessages"; messages: Schema.Message[] };
 type UserJoinedResponse = { type: "UserJoined"; userId: string };
 type UserLeftResponse = { type: "UserLeft"; userId: string };
 type MessageEditedResponse = { type: "MessageEdited"; message: Schema.Message };
+type MessageDeletedResponse = { type: "MessageDeleted"; messageId: number };
 
 type PartyResponses =
   | InitResponse
   | SetMessagesResponse
   | UserJoinedResponse
   | UserLeftResponse
-  | MessageEditedResponse;
+  | MessageEditedResponse
+  | MessageDeletedResponse;
 
 const party = createPartyRpc<PartyResponses, ClientContext>();
 
@@ -35,12 +37,12 @@ export const partyEvents = party.events({
   addMessage: {
     schema: v.object({
       content: v.string(),
-      authorId: v.string(),
     }),
-    async onMessage(message, _, room, ctx) {
+    async onMessage(message, conn, room, ctx) {
+      const authorId = conn.id;
       const newMessage = await ctx.Queries.Topic.addMessageToTopic(
         ctx.topicId,
-        message.authorId,
+        authorId,
         message.content
       );
 
@@ -138,6 +140,34 @@ export const partyEvents = party.events({
       partyEvents.broadcast(room, {
         type: "MessageEdited",
         message: updatedMessage,
+      });
+    },
+  },
+  deleteMessage: {
+    schema: v.object({
+      messageId: v.number(),
+    }),
+    async onMessage(message, conn, room, ctx) {
+      const userId = conn.id;
+      // users can only delete their own messages
+      const deletedMessage = await ctx.Queries.Topic.deleteMessageInTopic(
+        ctx.topicId,
+        userId,
+        message.messageId
+      );
+
+      if (!deletedMessage) {
+        console.log("did not delete message");
+        return;
+      }
+
+      ctx.messages = ctx.messages?.filter(
+        (m) => m.id !== deletedMessage.id
+      ) as Schema.Message[];
+
+      partyEvents.broadcast(room, {
+        type: "MessageDeleted",
+        messageId: deletedMessage.id,
       });
     },
   },

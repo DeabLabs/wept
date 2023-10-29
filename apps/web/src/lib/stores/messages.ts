@@ -9,7 +9,7 @@ import invariant from 'tiny-invariant';
 import throttle from 'just-throttle';
 import { object, optional, parse, string } from 'valibot';
 
-type OptimisticMessage = {
+export type OptimisticMessage = {
   content: string;
   authorId: string;
 };
@@ -142,6 +142,22 @@ export function createMessagesStore({
             updateMessages(e.message);
           });
 
+          state.client.on('MessageDeleted', (e) => {
+            update((state) => {
+              const newState = {
+                ...state,
+                messages: state.messages.filter((message) => {
+                  if ('id' in message && message.id === e.messageId) {
+                    return false;
+                  }
+                  return true;
+                })
+              };
+              return newState;
+            });
+            callbacks?.MessageDeleted?.();
+          });
+
           state.client.on('UserJoined', (e) => {
             update((state) => {
               const newState = {
@@ -183,6 +199,10 @@ export function createMessagesStore({
     addMessage: (message: OptimisticMessage) => {
       invariant(state.client, 'client should be defined');
       state.client.send({ type: 'addMessage', ...message });
+    },
+    deleteMessage: (messageId: number) => {
+      invariant(state.client, 'client should be defined');
+      state.client.send({ type: 'deleteMessage', messageId });
     }
   };
 }
