@@ -51,7 +51,8 @@ const config = {
             },
             p: {
               marginTop: 0,
-              marginBottom: 0
+              marginBottom: 0,
+              overflowWrap: 'anywhere'
             },
             pre: {
               overflow: 'auto',
