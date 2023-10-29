@@ -88,8 +88,10 @@
       return;
     }
 
-    e.preventDefault();
-    document.getElementById('send-btn')?.click();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('send-btn')?.click();
+    }
   }
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
