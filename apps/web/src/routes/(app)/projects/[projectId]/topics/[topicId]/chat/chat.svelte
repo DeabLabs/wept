@@ -83,15 +83,13 @@
     authorId === data.user.id ? 'text-info' : 'text-base-content';
 
   function textareaKeyDown(e: KeyboardEvent) {
-    if (!e.key || (!e.metaKey && !e.shiftKey)) {
+    // skip handleSubmit if enter + cmd or enter + shift is pressed
+    if (e.key === 'Enter' && (e.metaKey || e.shiftKey)) {
       return;
     }
 
-    // call handleSubmit if enter + cmd or enter + shift is pressed
-    if (e.key === 'Enter' && (e.metaKey || e.shiftKey)) {
-      e.preventDefault();
-      document.getElementById('send-btn')?.click();
-    }
+    e.preventDefault();
+    document.getElementById('send-btn')?.click();
   }
 
   async function handleSubmit(event: { currentTarget: EventTarget & HTMLFormElement }) {
@@ -203,7 +201,7 @@
       on:keydown={textareaKeyDown}
       use:autosize
       name="content"
-      placeholder="Shift + Enter to send a message. Enter to add a new line."
+      placeholder="Shift + Enter to add a new line. Enter to send."
       style="overflow-x: hidden;"
       class="input input-bordered w-full join-item max-h-36 !overflow-x-hidden resize-none pt-3"
     />
