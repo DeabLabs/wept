@@ -149,7 +149,7 @@ export const partyEvents = party.events({
     }),
     async onMessage(message, conn, room, ctx) {
       const userId = conn.id;
-      // users can only delete their own messages
+      // users can only delete their own messages or ai messages
       const deletedMessage = await ctx.Queries.Topic.deleteMessageInTopic(
         ctx.topicId,
         userId,

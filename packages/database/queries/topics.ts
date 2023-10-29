@@ -398,7 +398,7 @@ export class TopicQueries {
     // anyone can delete their own message
     // only admins can delete other messages
     const isAdminResult = await this.db
-      .select({ admin: usersInTopics.admin })
+      .select({ admin: usersInTopics.admin, userId: usersInTopics.userId })
       .from(usersInTopics)
       .where(
         and(
@@ -407,7 +407,23 @@ export class TopicQueries {
         )
       );
 
+    if (!isAdminResult.length) {
+      // the user is not in this topic
+      return null;
+    }
+
     const isAdmin = isAdminResult.length && isAdminResult[0].admin;
+
+    const messageResult = await this.db
+      .select()
+      .from(message)
+      .where(and(eq(message.id, messageId), eq(message.topicId, topicId)));
+
+    if (!messageResult.length) {
+      return null;
+    }
+
+    const messageAuthorId = messageResult[0].authorId;
 
     if (!isAdmin) {
       const result = await this.db
@@ -416,7 +432,9 @@ export class TopicQueries {
           and(
             eq(message.id, messageId),
             eq(message.topicId, topicId),
-            eq(message.authorId, userId)
+            // if author is null, this is an AI message
+            // anyone in the topic can delete those
+            messageAuthorId !== null ? eq(message.authorId, userId) : undefined
           )
         )
         .returning();

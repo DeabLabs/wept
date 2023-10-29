@@ -204,12 +204,13 @@
               <button
                 tabindex="0"
                 class={clsx(
-                  'btn btn-sm btn-ghost hidden',
-                  message.authorId === data.user.id && 'focus-visible:block group-hover:block'
+                  'btn btn-sm btn-ghost invisible',
+                  (message.authorId === data.user.id || message.authorId == null) &&
+                    'focus-visible:visible group-hover:visible'
                 )}><MoreHorizontalIcon /></button
               >
               <ul class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                {#if message.authorId === data.user.id && 'id' in message}
+                {#if (message.authorId === data.user.id || message.authorId == null) && 'id' in message}
                   <li>
                     <button on:click={() => 'id' in message && handleDeleteMessage(message.id)}
                       >Delete</button
