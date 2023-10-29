@@ -47,7 +47,12 @@ export default class Agent implements Party.Server {
   client: ReturnType<typeof createPartyClient<SafePartyEvents, SafePartyResponses>> | undefined;
   token: string | undefined;
   chatContext:
-    | { topicSystemMessage?: string; projectSystemMessage?: string; openaiKey: string }
+    | {
+        topicSystemMessage?: string;
+        projectSystemMessage?: string;
+        openaiKey: string;
+        model: string;
+      }
     | undefined;
   queryClient: QueryClient<SDbType>;
   openai: OpenAI | undefined;
@@ -104,6 +109,7 @@ export default class Agent implements Party.Server {
               this.client = undefined;
               this.topicId = undefined;
               this.projectId = undefined;
+              this.chatContext = undefined;
               return new Response(JSON.stringify({ success: true }));
             }
           }
@@ -146,7 +152,8 @@ export default class Agent implements Party.Server {
     this.chatContext = {
       topicSystemMessage,
       projectSystemMessage,
-      openaiKey: projectKey
+      openaiKey: projectKey,
+      model: project.model
     };
 
     this.openai = new OpenAI({ apiKey: projectKey });
@@ -183,6 +190,7 @@ export default class Agent implements Party.Server {
         console.log('No context loaded, refreshing context');
         await this.refresh();
       }
+      invariant(this.chatContext);
 
       const systemMessages: ChatCompletionMessageParam[] = [
         this.chatContext?.projectSystemMessage,
@@ -212,8 +220,9 @@ export default class Agent implements Party.Server {
       this.client?.send({ type: 'provideMessage', id: newMessagePlaceholder.id });
       const openai = this.openai;
       invariant(openai);
+      console.log('responding with model: ', this.chatContext.model);
       const stream = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo-16k',
+        model: this.chatContext?.model,
         messages: [
           {
             role: 'system',

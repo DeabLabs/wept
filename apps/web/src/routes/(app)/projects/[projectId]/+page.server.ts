@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { queries } from '$lib/server/queries/index.js';
+import { literal, optional, parse, union } from 'valibot';
 
 export const load = async ({ locals, params }) => {
   const session = await locals.auth.validate();
@@ -23,6 +24,10 @@ export const load = async ({ locals, params }) => {
   };
 };
 
+const modelSchema = optional(
+  union([literal('gpt-3.5-turbo'), literal('gpt-4'), literal('gpt-3.5-turbo-16k')])
+);
+
 export const actions = {
   update: async ({ locals, request, params }) => {
     const session = await locals.auth.validate();
@@ -36,6 +41,8 @@ export const actions = {
     const description = form.get('description')?.toString();
     const donateKey = form.get('donate')?.toString();
     const removeKey = form.get('remove')?.toString();
+    const modelRaw = form.get('model')?.toString();
+    const model = parse(modelSchema, modelRaw);
 
     if (!name) {
       return fail(400, {
@@ -80,7 +87,8 @@ export const actions = {
     const result = await queries.Project.updateProject(projectId, userId, {
       name,
       context,
-      description
+      description,
+      model
     });
 
     if (!result) {

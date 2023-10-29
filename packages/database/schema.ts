@@ -119,7 +119,7 @@ export const project = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     context: text("context"),
-    model: modelEnum("model").default("gpt-4").notNull(),
+    model: modelEnum("model").default("gpt-3.5-turbo-16k").notNull(),
     createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
       .defaultNow()
       .notNull(),

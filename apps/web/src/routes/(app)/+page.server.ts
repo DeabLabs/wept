@@ -76,8 +76,21 @@ export const actions = {
       });
     }
 
-    await queries.Topic.createTopic(projectId, userId, name);
+    const topic = await queries.Topic.createTopic(projectId, userId, name);
 
-    return { createTopic: { success: true } };
+    if (!topic) {
+      return fail(400, {
+        createTopic: {
+          success: false,
+          errors: {
+            general: 'Could not create topic'
+          }
+        }
+      });
+    }
+
+    return {
+      createTopic: { success: true }
+    };
   }
 };

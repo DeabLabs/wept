@@ -60,6 +60,19 @@
           >
         </label>
       </div>
+      <div class="form-control w-full max-w-xs">
+        <label class="label" for="model">
+          <span class="label-text">GPT Model</span>
+        </label>
+        <select name="model" class="select select-bordered" value={data.project.model}>
+          <option>gpt-3.5-turbo</option>
+          <option>gpt-3.5-turbo-16k</option>
+          <option>gpt-4</option>
+        </select>
+        <label class="label" for="model">
+          <span class="label-text-alt">All topics in this project will use this model</span>
+        </label>
+      </div>
       {#if hasDonatedProjectKey === 'own_key'}
         <div class="form-control">
           <label class="label" for="remove">You have donated your key to this project</label>
