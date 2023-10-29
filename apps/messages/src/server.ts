@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type * as Party from 'partykit/server';
 import { Queries as QueryClient } from 'database';
 import { Pool } from '@neondatabase/serverless';
@@ -85,7 +84,6 @@ export default class Server implements Party.Server {
       );
 
       if (!valid) {
-        console.log(req.headers.get('Authorization'));
         console.log("user's bearer token is invalid");
         return new Response('Unauthorized', {
           status: 401
@@ -212,7 +210,7 @@ export default class Server implements Party.Server {
     }
   }
 
-  async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+  async onConnect(conn: Party.Connection) {
     console.log('connecting user', conn.id);
     if (conn.id !== 'AGENT') {
       this.context.users.add(conn.id);

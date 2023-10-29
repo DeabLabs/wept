@@ -288,7 +288,7 @@
   </form>
 </dialog>
 
-{#if form}
+{#if form || messagesError !== undefined}
   <div class="toast toast-end">
     {#if form?.invite?.success}
       <div class="alert alert-success">
@@ -316,14 +316,6 @@
       </div>
     {:else if messagesError !== undefined}
       <div class="alert alert-error">
-        <button
-          on:click={() => {
-            form = null;
-          }}
-          class="absolute top-2 right-2 btn btn-circle btn-xs btn-neutral"
-        >
-          <X size={16} />
-        </button>
         <span>{messagesError}</span>
       </div>
     {/if}
