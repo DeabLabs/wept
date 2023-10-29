@@ -38,49 +38,67 @@ export function createMessagesStore({
   topicId,
   callbacks
 }: CreateMessagesStoreArgs) {
-  let socket: PartySocket | undefined;
-  let client: ReturnType<typeof createPartyClient<SafePartyEvents, SafePartyResponses>>;
+  const state: {
+    socket: PartySocket | undefined;
+    client: ReturnType<typeof createPartyClient<SafePartyEvents, SafePartyResponses>> | undefined;
+    abort?: AbortController;
+  } = {
+    socket: undefined,
+    client: undefined
+  };
 
   const { subscribe } = readable({ ...initialState }, (set, update) => {
     if (!partyOptions || !browser) return;
-
-    new Promise(() => {
-      const go = async () => {
-        try {
-          const authResponse = await fetch(`/api/party-auth`, {
-            method: 'POST',
-            body: JSON.stringify({
-              projectId,
-              topicId
-            })
-          });
+    try {
+      const abort = new AbortController();
+      state.abort = abort; // set the abort controller on the state object
+      // ensure that the cleanup function always has access to the abort controller
+      state.abort?.signal.addEventListener('abort', () => {
+        state.socket?.close();
+        state.client?.unsubscribe();
+      });
+      fetch(`/api/party-auth`, {
+        method: 'POST',
+        body: JSON.stringify({
+          projectId,
+          topicId
+        }),
+        signal: abort.signal
+      })
+        .then(async (authResponse) => {
+          if (!authResponse.ok) {
+            throw new Error('Failed to authenticate');
+          }
 
           const body = await authResponse.json();
           const response = parse(
             object({
+              key: optional(string()),
               token: optional(string()),
               error: optional(string())
             }),
             body
           );
 
+          console.log('response', response);
+
           if (response.error) {
             throw new Error(response.error);
           }
 
-          if (!response.token) {
+          if (!response.token || !response.key) {
             throw new Error('No token');
           }
 
-          socket = new PartySocket({
+          state.socket = new PartySocket({
             ...partyOptions,
-            query: { ...partyOptions.query, token: response.token, user_id: partyOptions.id }
+            query: { ...partyOptions.query, token: response.token, key: response.key }
           });
-          client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
-          invariant(socket, 'socket should be defined');
-          invariant(client, 'client should be defined');
+          state.client = createPartyClient<SafePartyEvents, SafePartyResponses>(state.socket);
+          invariant(state.socket, 'socket should be defined');
+          invariant(state.client, 'client should be defined');
 
-          client.on('Init', (e) => {
+          state.client.on('Init', (e) => {
             const newState = {
               messages: e.messages,
               activeUserIds: new Set(e.userIds)
@@ -89,7 +107,7 @@ export function createMessagesStore({
             callbacks?.Init?.();
           });
 
-          client.on('SetMessages', (e) => {
+          state.client.on('SetMessages', (e) => {
             update((state) => {
               const newState = {
                 ...state,
@@ -120,11 +138,11 @@ export function createMessagesStore({
             { trailing: true, leading: true }
           );
 
-          client.on('MessageEdited', (e) => {
+          state.client.on('MessageEdited', (e) => {
             updateMessages(e.message);
           });
 
-          client.on('UserJoined', (e) => {
+          state.client.on('UserJoined', (e) => {
             update((state) => {
               const newState = {
                 ...state,
@@ -135,7 +153,7 @@ export function createMessagesStore({
             callbacks?.UserJoined?.();
           });
 
-          client.on('UserLeft', (e) => {
+          state.client.on('UserLeft', (e) => {
             update((state) => {
               const newState = {
                 ...state,
@@ -145,22 +163,26 @@ export function createMessagesStore({
             });
             callbacks?.UserLeft?.();
           });
-        } catch (e) {
-          update((v) => ({ ...v, error: 'Could not connect to server' }));
-        }
-      };
+        })
+        .catch(() => {
+          // noop
+          // the user rejected the request by switching pages
+        });
+    } catch (e) {
+      update((v) => ({ ...v, error: 'Could not connect to server' }));
+    }
 
-      go();
-    });
-
-    return () => socket?.close();
+    return () => {
+      // cleanup
+      state.abort?.abort();
+    };
   });
 
   return {
     subscribe,
     addMessage: (message: OptimisticMessage) => {
-      invariant(client, 'client should be defined');
-      client.send({ type: 'addMessage', ...message });
+      invariant(state.client, 'client should be defined');
+      state.client.send({ type: 'addMessage', ...message });
     }
   };
 }

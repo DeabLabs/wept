@@ -9,12 +9,13 @@ export const POST: RequestHandler = async ({ locals, request }) => {
     const body = await request.json();
     const { projectId, topicId } = body;
 
-    const url = `${PARTY_HOST}/party/${projectId}-${topicId}`;
-    console.log(url);
+    const roomId = `${projectId}-${topicId}`;
+    const url = `${PARTY_HOST}/party/${roomId}`;
     const authResponse = await fetch(url, {
       method: 'POST',
       body: JSON.stringify({
-        userId: session.user.userId
+        userId: session.user.userId,
+        roomId
       }),
       headers: {
         Authorization: `Bearer ${session.sessionId}`

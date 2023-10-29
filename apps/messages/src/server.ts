@@ -76,7 +76,7 @@ export default class Server implements Party.Server {
     try {
       invariant(req.method.toLocaleLowerCase() === 'post', 'must be a post request');
       const body = await req.json();
-      const { userId } = parse(object({ userId: string() }), body);
+      const { userId, roomId } = parse(object({ userId: string(), roomId: string() }), body);
 
       // validate user based on bearer token
       const valid = await this.auth.validateSession(
@@ -91,8 +91,9 @@ export default class Server implements Party.Server {
       }
 
       // create token
+      const key = `${userId}-${roomId}`;
       const result = await this.context.Queries.TemporaryTokens.createToken(
-        userId,
+        key,
         generateRandomString(16)
       );
 
@@ -101,7 +102,7 @@ export default class Server implements Party.Server {
       }
 
       // return token
-      return new Response(JSON.stringify({ token: result.value }), {
+      return new Response(JSON.stringify({ token: result.value, key }), {
         status: 200
       });
     } catch {
@@ -114,28 +115,16 @@ export default class Server implements Party.Server {
   static async onBeforeConnect(req: Party.Request, lobby: Party.Lobby) {
     // if key in url === key in storage, assume agent
     // and let them in
-    const keyInUrl = new URL(req.url).searchParams.get('token');
+    const tokenInUrl = new URL(req.url).searchParams.get('token');
+    const keyInUrl = new URL(req.url).searchParams.get('key');
 
-    if (!keyInUrl) {
+    if (!tokenInUrl || !keyInUrl) {
       return new Response('Unauthorized', { status: 401 });
     }
 
     const { Queries } = Server.getNewDbClient(lobby.env.DATABASE_URL as string);
-    const agentKey = `agent-${lobby.id}`;
-    const valid = await Queries.TemporaryTokens.validateAndConsumeToken(agentKey, keyInUrl);
 
-    if (valid) {
-      console.log('AGENT VALID');
-      return req;
-    }
-
-    // otherwise, assume user and validate key as bearer token
-    const userInUrl = new URL(req.url).searchParams.get('user_id');
-    if (!userInUrl) {
-      return new Response('Unauthorized', { status: 401 });
-    }
-
-    const userValid = await Queries.TemporaryTokens.validateAndConsumeToken(userInUrl, keyInUrl);
+    const userValid = await Queries.TemporaryTokens.validateAndConsumeToken(keyInUrl, tokenInUrl);
 
     if (!userValid) {
       return new Response('Unauthorized', { status: 401 });
@@ -167,6 +156,7 @@ export default class Server implements Party.Server {
         body: JSON.stringify({
           action: 'connect',
           id: this.party.id,
+          key: agentKey,
           topicId: this.context.topicId,
           projectId: this.context.projectId,
           host: this.party.env.PARTY_HOST,
