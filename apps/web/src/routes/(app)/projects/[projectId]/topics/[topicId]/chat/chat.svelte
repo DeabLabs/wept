@@ -37,6 +37,8 @@
   const throttledScroll = throttle(scrollToEndOfMessages, 256, { leading: true, trailing: true });
 
   $: messagesStore = createMessagesStore({
+    projectId: data.projectId,
+    topicId: data.topicId,
     partyOptions: data.partyOptions,
     callbacks: {
       Init: () => {
@@ -69,7 +71,7 @@
     }
   });
 
-  $: ({ messages, activeUserIds } = $messagesStore);
+  $: ({ messages, activeUserIds, error: messagesError } = $messagesStore);
 
   $: memberCountLabel = data.topic.members.length === 1 ? 'member' : 'members';
   $: memberMap = new Map(data.topic.members.map((member) => [member.id, member]));
@@ -286,7 +288,7 @@
   </form>
 </dialog>
 
-{#if form}
+{#if form || messagesError !== undefined}
   <div class="toast toast-end">
     {#if form?.invite?.success}
       <div class="alert alert-success">
@@ -311,6 +313,10 @@
           <X size={16} />
         </button>
         <span>Could not invite member.</span>
+      </div>
+    {:else if messagesError !== undefined}
+      <div class="alert alert-error">
+        <span>{messagesError}</span>
       </div>
     {/if}
   </div>

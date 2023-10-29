@@ -7,6 +7,7 @@ import PartySocket from 'partysocket';
 import { createPartyClient } from 'partyrpc';
 import invariant from 'tiny-invariant';
 import throttle from 'just-throttle';
+import { object, optional, parse, string } from 'valibot';
 
 type OptimisticMessage = {
   content: string;
@@ -16,10 +17,13 @@ type OptimisticMessage = {
 type MessagesState = {
   messages: (OptimisticMessage | Schema.Message)[];
   activeUserIds: Set<string>;
+  error?: string;
 };
 
 type CreateMessagesStoreArgs = {
   partyOptions: PartySocketOptions;
+  projectId: string;
+  topicId: string;
   callbacks?: Partial<Record<SafePartyResponses['type'], () => void>>;
 };
 
@@ -28,82 +32,125 @@ const initialState: MessagesState = {
   activeUserIds: new Set<string>()
 };
 
-export function createMessagesStore({ partyOptions, callbacks }: CreateMessagesStoreArgs) {
+export function createMessagesStore({
+  partyOptions,
+  projectId,
+  topicId,
+  callbacks
+}: CreateMessagesStoreArgs) {
   let socket: PartySocket | undefined;
   let client: ReturnType<typeof createPartyClient<SafePartyEvents, SafePartyResponses>>;
 
   const { subscribe } = readable({ ...initialState }, (set, update) => {
     if (!partyOptions || !browser) return;
 
-    socket = new PartySocket(partyOptions);
-    client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
-    invariant(socket, 'socket should be defined');
-    invariant(client, 'client should be defined');
-
-    client.on('Init', (e) => {
-      const newState = {
-        messages: e.messages,
-        activeUserIds: new Set(e.userIds)
-      };
-      set(newState);
-      callbacks?.Init?.();
-    });
-
-    client.on('SetMessages', (e) => {
-      update((state) => {
-        const newState = {
-          ...state,
-          messages: e.messages
-        };
-        return newState;
-      });
-      callbacks?.SetMessages?.();
-    });
-
-    const updateMessages = throttle(
-      (newMessage: Schema.Message) => {
-        update((state) => {
-          const newState = {
-            ...state,
-            messages: state.messages.map((message) => {
-              if ('id' in message && message.id === newMessage.id) {
-                return newMessage;
-              }
-              return message;
+    new Promise(() => {
+      const go = async () => {
+        try {
+          const authResponse = await fetch(`/api/party-auth`, {
+            method: 'POST',
+            body: JSON.stringify({
+              projectId,
+              topicId
             })
-          };
-          return newState;
-        });
-        callbacks?.MessageEdited?.();
-      },
-      16,
-      { trailing: true, leading: true }
-    );
+          });
 
-    client.on('MessageEdited', (e) => {
-      updateMessages(e.message);
-    });
+          const body = await authResponse.json();
+          const response = parse(
+            object({
+              token: optional(string()),
+              error: optional(string())
+            }),
+            body
+          );
 
-    client.on('UserJoined', (e) => {
-      update((state) => {
-        const newState = {
-          ...state,
-          activeUserIds: new Set([...state.activeUserIds, e.userId])
-        };
-        return newState;
-      });
-      callbacks?.UserJoined?.();
-    });
+          if (response.error) {
+            throw new Error(response.error);
+          }
 
-    client.on('UserLeft', (e) => {
-      update((state) => {
-        const newState = {
-          ...state,
-          activeUserIds: new Set([...state.activeUserIds].filter((id) => id !== e.userId))
-        };
-        return newState;
-      });
-      callbacks?.UserLeft?.();
+          if (!response.token) {
+            throw new Error('No token');
+          }
+
+          socket = new PartySocket({
+            ...partyOptions,
+            query: { ...partyOptions.query, token: response.token, user_id: partyOptions.id }
+          });
+          client = createPartyClient<SafePartyEvents, SafePartyResponses>(socket);
+          invariant(socket, 'socket should be defined');
+          invariant(client, 'client should be defined');
+
+          client.on('Init', (e) => {
+            const newState = {
+              messages: e.messages,
+              activeUserIds: new Set(e.userIds)
+            };
+            set(newState);
+            callbacks?.Init?.();
+          });
+
+          client.on('SetMessages', (e) => {
+            update((state) => {
+              const newState = {
+                ...state,
+                messages: e.messages
+              };
+              return newState;
+            });
+            callbacks?.SetMessages?.();
+          });
+
+          const updateMessages = throttle(
+            (newMessage: Schema.Message) => {
+              update((state) => {
+                const newState = {
+                  ...state,
+                  messages: state.messages.map((message) => {
+                    if ('id' in message && message.id === newMessage.id) {
+                      return newMessage;
+                    }
+                    return message;
+                  })
+                };
+                return newState;
+              });
+              callbacks?.MessageEdited?.();
+            },
+            16,
+            { trailing: true, leading: true }
+          );
+
+          client.on('MessageEdited', (e) => {
+            updateMessages(e.message);
+          });
+
+          client.on('UserJoined', (e) => {
+            update((state) => {
+              const newState = {
+                ...state,
+                activeUserIds: new Set([...state.activeUserIds, e.userId])
+              };
+              return newState;
+            });
+            callbacks?.UserJoined?.();
+          });
+
+          client.on('UserLeft', (e) => {
+            update((state) => {
+              const newState = {
+                ...state,
+                activeUserIds: new Set([...state.activeUserIds].filter((id) => id !== e.userId))
+              };
+              return newState;
+            });
+            callbacks?.UserLeft?.();
+          });
+        } catch (e) {
+          update((v) => ({ ...v, error: 'Could not connect to server' }));
+        }
+      };
+
+      go();
     });
 
     return () => socket?.close();

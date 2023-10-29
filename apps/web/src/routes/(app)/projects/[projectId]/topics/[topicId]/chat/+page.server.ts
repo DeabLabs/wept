@@ -22,6 +22,8 @@ export const load = async ({ locals, params }) => {
       room: `${params.projectId}-${params.topicId}`,
       id: session.user.userId
     },
+    projectId: params.projectId,
+    topicId: params.topicId,
     settingsLink: `/projects/${params.projectId}/topics/${params.topicId}`
   };
 };

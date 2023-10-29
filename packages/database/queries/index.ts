@@ -6,6 +6,7 @@ import type { Schema } from "../index.js";
 import { ProjectQueries } from "./projects.js";
 import { TopicQueries } from "./topics.js";
 import { UserQueries } from "./user.js";
+import { TemporaryTokensQueries } from "./temporaryTokens.js";
 
 export type DbType = PostgresJsDatabase<typeof Schema>;
 export type SDbType = NeonDatabase<typeof Schema>;
@@ -15,11 +16,13 @@ export class Queries<T extends DbType | SDbType> {
   Project: ProjectQueries;
   Topic: TopicQueries;
   User: UserQueries;
+  TemporaryTokens: TemporaryTokensQueries;
 
   constructor(db: T) {
     this.db = db;
     this.Project = new ProjectQueries(db);
     this.Topic = new TopicQueries(db);
     this.User = new UserQueries(db);
+    this.TemporaryTokens = new TemporaryTokensQueries(db);
   }
 }
