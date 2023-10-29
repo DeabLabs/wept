@@ -93,13 +93,17 @@ export default class Server implements Party.Server {
       }
 
       // create token
-      const token = generateRandomString(16);
+      const result = await this.context.Queries.TemporaryTokens.createToken(
+        userId,
+        generateRandomString(16)
+      );
 
-      // store token
-      await this.party.storage.put(userId, token);
+      if (!result) {
+        throw new Error('Failed to create token');
+      }
 
       // return token
-      return new Response(JSON.stringify({ token }), {
+      return new Response(JSON.stringify({ token: result.value }), {
         status: 200
       });
     } catch {
@@ -110,8 +114,6 @@ export default class Server implements Party.Server {
   }
 
   static async onBeforeConnect(req: Party.Request, lobby: Party.Lobby) {
-    if (!req.url.startsWith('ws')) return req;
-
     // if key in url === key in storage, assume agent
     // and let them in
     const keyInUrl = new URL(req.url).searchParams.get('token');
