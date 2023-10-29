@@ -5,7 +5,7 @@ const { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIEN
 
 export const load = async ({ locals }) => {
   const session = await locals.auth.validate();
-  if (session) throw redirect(302, '/');
+  if (session) throw redirect(302, '/profile');
 
   return {
     availableAuthProviders: {
