@@ -80,8 +80,6 @@ export function createMessagesStore({
             body
           );
 
-          console.log('response', response);
-
           if (response.error) {
             throw new Error(response.error);
           }
