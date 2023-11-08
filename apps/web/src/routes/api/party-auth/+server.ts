@@ -1,5 +1,5 @@
 import { PARTY_HOST } from '$env/static/private';
-import { redirect, type RequestHandler } from '@sveltejs/kit';
+import { json, redirect, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ locals, request }) => {
   try {
@@ -26,7 +26,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
       throw new Error('Failed to authenticate');
     }
 
-    return authResponse;
+    return json(await authResponse.json());
   } catch (e) {
     console.error(e);
     return new Response(JSON.stringify({ error: 'Failed to authenticate' }), { status: 400 });
