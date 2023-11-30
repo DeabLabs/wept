@@ -68,6 +68,7 @@
           <option>gpt-3.5-turbo</option>
           <option>gpt-3.5-turbo-16k</option>
           <option>gpt-4</option>
+          <option>gpt-4-1106-preview</option>
         </select>
         <label class="label" for="model">
           <span class="label-text-alt">All topics in this project will use this model</span>

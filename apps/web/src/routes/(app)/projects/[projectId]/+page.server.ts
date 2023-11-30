@@ -25,7 +25,12 @@ export const load = async ({ locals, params }) => {
 };
 
 const modelSchema = optional(
-  union([literal('gpt-3.5-turbo'), literal('gpt-4'), literal('gpt-3.5-turbo-16k')])
+  union([
+    literal('gpt-3.5-turbo'),
+    literal('gpt-4'),
+    literal('gpt-4-1106-preview'),
+    literal('gpt-3.5-turbo-16k')
+  ])
 );
 
 export const actions = {
