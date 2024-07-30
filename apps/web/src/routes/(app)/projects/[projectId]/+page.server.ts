@@ -29,6 +29,7 @@ const modelSchema = optional(
     literal('gpt-3.5-turbo'),
     literal('gpt-4'),
     literal('gpt-4-1106-preview'),
+    literal('gpt-4o'),
     literal('gpt-3.5-turbo-16k')
   ])
 );

@@ -107,6 +107,7 @@ export const userRelations = relations(user, ({ many }) => ({
 }));
 
 export const modelEnum = pgEnum("model", [
+  "gpt-4o",
   "gpt-4",
   "gpt-4-1106-preview",
   "gpt-3.5-turbo",
@@ -120,7 +121,7 @@ export const project = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     context: text("context"),
-    model: modelEnum("model").default("gpt-3.5-turbo-16k").notNull(),
+    model: modelEnum("model").default("gpt-4o").notNull(),
     createdAt: timestamp("createdAt", { precision: 3, mode: "string" })
       .defaultNow()
       .notNull(),
